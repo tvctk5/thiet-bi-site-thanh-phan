@@ -91,6 +91,38 @@ echo '<label for="dien-luoi"><input id="dien-luoi" name="ra_cau_dao" type="radio
 echo '</div>';
 
 echo '</div>';
+} else{
+	if($objId == "ra_1"){
+		$selected_tudong = "";
+		$selected_dieuhoa = "";
+		$selected_quat = "";
+		
+		if($value == "0") {
+		$selected_tudong = "checked";
+			}else{
+				if($value == "1") {
+		$selected_dieuhoa = "checked";
+				} else{
+					$selected_quat = "checked";
+				}
+		}
+		
+		echo '<div class="class-ra-objradiobutton class-ra_1">';
+		
+		echo '<div class="radio">';
+		echo '<label for="tu-dong"><input id="tu-dong" name="ra_1" type="radio"' . $selected_tudong .' value="0" class="" /> Tu dong</label>';
+		echo '</div>';
+		
+		echo '<div class="radio">';
+		echo '<label for="dieu-hoa"><input id="dieu-hoa" name="ra_1" type="radio" ' . $selected_dieuhoa .' value="1" /> Dieu hoa</label>';
+		echo '</div>';
+		
+		echo '<div class="radio">';
+		echo '<label for="quat"><input id="quat" name="ra_1" type="radio" ' . $selected_quat .' value="2" /> Quat</label>';
+		echo '</div>';
+		
+		echo '</div>';
+		}
 }
 
 break;
@@ -169,8 +201,33 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 		$stateValue = "1";
 	}
 
+	if($objId == "vao_dien_luoi" || $objId == "vao_tong_dai") {
+		if($content[0] == "0") {
+			$bg_cl = "background-color-on";
+			$stateView = "ON";
+			$stateViewLower = "on";
+			$stateValue = "1";
+		} else{
+			$bg_cl = "background-color-off";
+			$stateView = "OFF";
+			$stateViewLower = "off";
+			$stateValue = "0";
+		}
+	}
+
 	// Check history
 	CheckAndCreateUpdateHistory($conn, $id, $stateValue);
+	/*
+	if($objId != "vao_dien_luoi" && $objId != "vao_tong_dai") {
+		CheckAndCreateUpdateHistory($conn, $id, $stateValue);
+	} else{
+		$newState = "0";
+		if($stateValue == "0"){
+			$newState = "1";
+		}
+
+		CheckAndCreateUpdateHistory($conn, $id, $newState);
+	}*/
 
 	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 ' . $bg_cl . '">';
 		echo '<div class="object '.$objType . ' ' . $objType . "-" . $stateViewLower . " " .$objFalvor. " " .$stateName.'" id="'. $objId .'" mute="' . $mute . '">';

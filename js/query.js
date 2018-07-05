@@ -1,6 +1,6 @@
 $(document).ready(function() {
 var notReload = false;
-var maxTime = 10; // Seconds
+var maxTime = 7; // Seconds
 var countTime = 0;
 
 // check if device is touch screen
@@ -54,7 +54,39 @@ $(".obj-timer").on("click",function(e) {
 		TurnOff(OBJECT);
 });
 
+$(".obj-button-up-down-icon").bind("click",function(e) {
+	e.preventDefault();
 
+	$(this).addClass("obj-button-up-down-mousedowning");
+	TurnOn($(this).closest(".object"));
+	$('.obj-button-up-down').addClass("turn-on");
+	console.log("Mouse down");
+	notReload = true;
+
+	$('#element_to_pop_up').bPopup({
+		//appendTo: 'form'
+		 zIndex: 20000
+		, modalClose: false
+		, escClose: false 
+		, modalClose : false
+	});
+});
+
+$(".obj-button-up-down-icon").on("off",function(e) {
+	console.log("Mouse up");
+	var obj = $(this);
+	TurnOff(obj.closest(".object"));
+
+	setTimeout(function(){
+		obj.removeClass("obj-button-up-down-mousedowning");
+		$('.obj-button-up-down').removeClass("turn-on");
+		notReload = false;
+	}, 1000);
+	
+});
+
+
+/*
 $(".obj-button-up-down-icon").on("mousedown touchstart",function(e) {
 	$(this).addClass("obj-button-up-down-mousedowning");
 	TurnOn($(this).closest(".object"));
@@ -80,7 +112,7 @@ $(".obj-button-up-down-icon").on("mouseleave",function(e) {
 		$(this).trigger("mouseup");
 	}
 });
-
+*/
 
 //	--	Object Switch 	--	//	
 
@@ -213,6 +245,26 @@ $(".class-ra_cau_dao input").on("click", function(){
 	});
 });
 
+
+$(".class-ra_1 input").on("click", function(){
+	var OBJECT = $(this);
+	var value = OBJECT.val();
+
+	// var status = $(OBJECT).find("input[name='state']").val();
+	$.post(
+		"function/data.php",
+		{
+			type : "ra_1_tudong_dieuhoa_quat",
+			value : value,
+			objid : "ra_1"
+		}	
+	).fail(function(){
+		console.log(".class-ra_1 input set to fail");
+	}).always(function(){
+		console.log(".class-ra_1 input set to ok");
+	});
+});
+
 // function alert
 function AlertBox(message) {
 	$(".log-box").addClass("log-show");
@@ -259,6 +311,7 @@ if(objMetaRefresh != null && objMetaRefresh != undefined){
 	
 	setInterval(function(){
 		if(!notReload){
+			$(".obj-button-up-down-icon").unbind("click");
 			location.reload();
 		}
 	}, time_refresh * 1000);
@@ -273,7 +326,7 @@ setInterval(function(){
 		countTime ++;
 		if(countTime == maxTime){
 			// Update to 0
-			$(".obj-button-up-down-icon").trigger("mouseup");
+			$(".obj-button-up-down-icon").trigger("off");
 		}
 
 		if(countTime >= maxTime + 3){
