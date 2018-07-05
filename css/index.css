@@ -457,7 +457,7 @@ body {
 }
 
 /*-----------------------------------------*/
-.class-ra_cau_dao{
+.class-ra_cau_dao, .class-ra-objradiobutton{
   padding: 5px;
   padding-left:5%;color: greenyellow;background-color: #0e7275;
 }
@@ -522,3 +522,4 @@ body{
   margin-top: 5px;
   cursor: pointer;
 }
+#element_to_pop_up { display:none; }

@@ -43,6 +43,26 @@
 
 			UpdateValueByObjId($conn, "ra_cau_dao", $str);
 		}
+		else if($_REQUEST["type"]=="tudong_dieuhoa_quat") {
+			$str = $_REQUEST["value"];
+			
+			// ghi file
+			$path = $path_dir .'ra_cau_dao_value.txt';
+			$fp = @fopen($path, "w+");
+			fwrite($fp, $str);
+
+			UpdateValueByObjId($conn, "ra_cau_dao", $str);
+		}
+		else if($_REQUEST["type"]=="ra_1_tudong_dieuhoa_quat") {
+			$str = $_REQUEST["value"];
+			
+			// ghi file
+			$path = $path_dir .'ra_1_value.txt';
+			$fp = @fopen($path, "w+");
+			fwrite($fp, $str);
+
+			UpdateValueByObjId($conn, "ra_1", $str);
+		}
 		else if($_REQUEST["type"]=="mute") {
 			$value = $_REQUEST["value"];
 			$objtype = $_REQUEST["objtype"];

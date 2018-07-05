@@ -43,8 +43,9 @@ $conn = ConnectDatabse();
     <script type="text/javascript" src="js/jquery/jquery.js"></script>
     <script type="text/javascript" src="js/jquery/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/jquery.ui.touch-punch.min.js"></script>
-    <script type="text/javascript" src="js/query.js"></script>
     <script type="text/javascript" src="js/jquery.tabletoCSV.js"></script>
+    <script type="text/javascript" src="js/jquery.bpopup.min.js"></script>
+    <script type="text/javascript" src="js/query.js"></script>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -55,6 +56,9 @@ $conn = ConnectDatabse();
 
   </head>
   <body class="lazy-man">
+   <!-- Element to pop up -->
+   <div id="element_to_pop_up"><img src='loading.gif'/></div>
+   <div id="element_to_pop_up_content" class="content" style="height: auto; width: auto;"></div>
     <!-- Fixed navbar -->
     <div class="container"></div>
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -134,7 +138,7 @@ else{
 
 <div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 <hr/>
-<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12' style='padding:10px;text-align:right; margin: 5px; background-color: #c9d9e0;'><!--button id="export" data-export="export">Export (Top 20)</button--> (<a href='export.php' target='_blank'>Export - Top 20</a>)</div>
+<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12' style='padding:10px;text-align:right; margin: 5px; background-color: #c9d9e0;'><!--button id="export" data-export="export">Export (Top 20)</button--> (<a href='export.php' target='_blank'>Export - All</a>)</div>
 <hr/>
 <table class='tbllistitem' id="export_table"> 
     <tr>
