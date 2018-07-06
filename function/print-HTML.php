@@ -8,7 +8,7 @@ function PrintObjectDatabase($conn) {
 	if ($result->num_rows > 0) {
 	    // output data of each row
 	    while($row = $result->fetch_assoc()) {
-	        PrintObject($row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"]);
+	        PrintObject($row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["id"]);
 	    }
 	} else {
 	    echo "0 results";
@@ -16,7 +16,7 @@ function PrintObjectDatabase($conn) {
 }
 
 // Print object
-function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value) {
+function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $id) {
 
 	if($state) {
 		$stateButton = "switch-on";
@@ -67,8 +67,12 @@ if($objType == "obj-de-may-no"){
 			
 		if($objType == "obj-de-may-no"){
 				echo '<div class="obj-de-may-no" style="padding-left: 20px;color:yellow">';
-				echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-de-may-no-input" name="obj-de-may-no-input" value="5"/> (giây)';
+				echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-de-may-no-input" name="obj-de-may-no-input" value="' . $amplitude . '"/> (giây)';
 				echo '</div>';
+
+				echo '<div class="slidecontainer">
+				<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider" id="deMayNo" deviceId="'.$id.'">
+			  </div>';
 			}
 
 

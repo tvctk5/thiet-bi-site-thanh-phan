@@ -523,3 +523,22 @@ body{
   cursor: pointer;
 }
 #element_to_pop_up { display:none; }
+.user-info{
+  float:right;font-size: 15px;color: white;
+}
+.slidecontainer{
+  padding-top: 20px;
+}
+
+@media only screen and (max-width: 480px)
+{
+  .navbar-header
+  {
+    font-size: 15px;
+    padding-top: 15px;
+  }
+  .user-info{
+    font-size: 12px;
+    padding-top: 8px;
+  }
+}

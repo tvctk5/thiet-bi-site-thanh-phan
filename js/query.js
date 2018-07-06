@@ -361,6 +361,41 @@ setInterval(function(){
 
 }, 1000);
 
+// range --------------------------------------------------------------
+var slider = document.getElementById("deMayNo");
+var output = document.getElementById("obj-de-may-no-input");
+
+// output.innerHTML = slider.value; // Display the default slider value
+
+// Update the current slider value (each time you drag the slider handle)
+var countRangeChange = 0;
+// slider.oninput = function() {
+$("#deMayNo").change(function() {
+	notReload = true;
+	output.value = this.value;
+	var id = $(this).attr("deviceId");
+	console.log("Device id: " + id)
+	countRangeChange++;
+
+	$.post(
+		"function/data.php",
+		{
+			type : "range_demayno",
+			value : this.value,
+			id : id
+		}	
+	).fail(function(){
+		console.log("Range DE MAY NO failed");
+	}).always(function(){
+		countRangeChange--;
+		if(countRangeChange == 0){
+			notReload = false;
+		}
+		console.log("Range DE MAY NO always");
+	});
+});
+// -------------------------------------------------
+
 });
 
 function pushMute(value, objtype, objid){
@@ -375,7 +410,7 @@ function pushMute(value, objtype, objid){
 	).fail(function(){
 		console.log("Set mute failed");
 	}).always(function(){
-		console.log("Set mute ok");
+		console.log("Set mute always");
 	});
 }
 

@@ -149,4 +149,15 @@ function UpdateMuteByObjId($conn, $objId, $objtype,$value) {
 	    echo "Error updating record: " . $conn->error . PHP_EOL;
 }
 
+// Update value mute
+function UpdateRangeDienMayNo($conn, $Id, $value) {
+
+	$sql = "UPDATE " . TABLE . " SET amplitude= $value WHERE id=$Id";
+	echo $sql . PHP_EOL;
+	if ($conn->query($sql) === TRUE)
+	    echo "Range Dien may no updated successfully" . PHP_EOL ;
+	else
+	    echo "Error updating Range Dien may no: " . $conn->error . PHP_EOL;
+}
+
 ?>

@@ -25,7 +25,7 @@ $conn = ConnectDatabse();
 <html lang="en"> 
   <head>
     <meta charset="utf-8">
-    <meta refreshpage="true" content="5000">
+    <meta refreshpage="true" content="5">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Tran Van Tu</title>
@@ -63,7 +63,7 @@ $conn = ConnectDatabse();
     <div class="container"></div>
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
-        <div style='float:right;font-size: 15px;color: white;'>
+        <div class='user-info'>
           <?php
           echo 'Xin chào <b style="color:yellow;">' . $_SESSION['username'] . '</b>'
           ?>
