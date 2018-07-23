@@ -11,8 +11,9 @@ include 'sql/sql-function.php';
 
 //tiến hành kiểm tra là người dùng đã đăng nhập hay chưa
 //nếu chưa, chuyển hướng người dùng ra lại trang đăng nhập
-if (!isset($_SESSION['username'])) {
-	 header('Location: login.php');
+if (!isset($_SESSION['hostid'])) {
+     header('Location: expired.php?type=hostidisnull');
+     return;
 }
 
 // Kiểm tra nếu người dùng đã ân nút đăng nhập thì mới xử lý
@@ -48,7 +49,7 @@ if ($end_date != ''){
     $end_date = $end_date  . ' 23:59:59' ;
 }
 
-$date_condition = '';
+$date_condition = ' AND hostid='. $_SESSION['hostid'] . ' ';
 if($start_date != '' && $end_date != ''){
     $date_condition = " AND h.startdate between '" . $start_date . "' and '" . $end_date . "' ";
 } else {
@@ -159,6 +160,9 @@ echo '<input type="text" id="end_date_search" name="end_date_search" placeholder
         <th>
             Id
         </th>
+        <th>
+            Trạm Id
+        </th>
         <!--th>
             Device Id
         </th-->
@@ -190,7 +194,7 @@ while ($row = mysqli_fetch_assoc($result)){
 
             // nếu current_page > 1 và total_page > 1 mới hiển thị nút prev
             if ($current_page > 1 && $total_page > 1){
-                echo '<a href="index.php?page='.($current_page-1).'&start_date='. $start_date_search .'&end_date='. $end_date_search .'&page_size='. $page_size_search .'">Prev</a> | ';
+                echo '<a href="?page='.($current_page-1).'&start_date='. $start_date_search .'&end_date='. $end_date_search .'&page_size='. $page_size_search .'">Prev</a> | ';
             }
 
             // Lặp khoảng giữa

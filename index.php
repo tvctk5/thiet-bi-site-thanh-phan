@@ -11,13 +11,74 @@ session_start();
 include 'function/print-HTML.php';
 include 'sql/sql-function.php';
 
+$conn = ConnectDatabse();
 //tiến hành kiểm tra là người dùng đã đăng nhập hay chưa
 //nếu chưa, chuyển hướng người dùng ra lại trang đăng nhập
-if (!isset($_SESSION['username'])) {
-	 header('Location: login.php');
+if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
+    $code = $_REQUEST["code"];
+    $hostid = $_REQUEST["hostid"];
+    if($code == "" || $hostid == ""){
+       header('Location: expired.php');
+       return;
+    }
+
+    // Lấy user
+    $sql = "select * from user where code = '$code' and status=1 LIMIT 1";
+    #echo $sql;
+
+    $query = mysqli_query($conn,$sql);
+    $num_rows = mysqli_num_rows($query);
+    // echo $num_rows;
+    if ($num_rows == 0) {
+        header('Location: expired.php?type=statusis0');
+        return;
+    }
+
+    while( $row = mysqli_fetch_assoc($query) ) { 
+        $user = $row;
+        break;
+    }
+
+    $_SESSION['user'] = $user;
+    $_SESSION['username'] = $user["username"];
+    $_SESSION['hostid'] = $hostid;
+
+    // Kiểm tra quyền
+    $sql = "select * from user_host where userId =". $user["Id"] . " and hostId=". $hostid . " LIMIT 1";
+    $num_rows = mysqli_num_rows($query);
+
+    if ($num_rows == 0) {
+        $_SESSION['username'] = NULL;
+        $_SESSION['user'] = NULL;
+        $_SESSION['hostid'] = NULL;
+
+        header('Location: accessdenied.php?type=notfound');
+        return;
+    }
+
+    $query = mysqli_query($conn,$sql);
+    while( $row = mysqli_fetch_assoc($query) ) { 
+        $user_host = $row;
+        break;
+    }
+
+    $_SESSION['permission_view'] = $user_host["view"];
+    $_SESSION['permission_control'] = $user_host["control"];
+
+    if($user_host["view"] == 0){
+        $_SESSION['username'] = NULL;
+        $_SESSION['user'] = NULL;
+        $_SESSION['hostid'] = NULL;
+
+        header('Location: accessdenied.php?type=viewis0');
+        return;
+    }
+
+	 //header('Location: login.php');
 }
 
-$conn = ConnectDatabse();
+
+
 
 ?>
 
@@ -25,13 +86,13 @@ $conn = ConnectDatabse();
 <html lang="en"> 
   <head>
     <meta charset="utf-8">
-    <meta refreshpage="true" content="5">
+    <meta refreshpage="true" content="500">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Tran Van Tu</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <link rel="stylesheet" type="text/css" href="css/google-font-css.css?family=Open+Sans">
     <link rel="stylesheet" type="text/css" href="fonts/font-awesome/css/font-awesome.min.css">
     <!-- Bootst192rap -->
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
@@ -107,6 +168,9 @@ else{
         echo fgets($fp);
     }
 }*/
+echo "<input type='hidden' name='hostid' id='hostid' value='" . $_SESSION['hostid'] . "' />";
+echo "<input type='hidden' name='permission_view' id='permission_view' value='" . $_SESSION['permission_view'] . "' />";
+echo "<input type='hidden' name='permission_control' id='permission_control' value='" . $_SESSION['permission_control'] . "' />";
 ?>   
 <!--========================================================-->
 
@@ -116,23 +180,28 @@ else{
      </div>
      <?php
 
-        PrintObjectVao($conn);
+       PrintObjectVao($conn);
 
     ?>
      </div>
 
 
 	 <div class="row">
+     <?php
+        if($_SESSION['permission_control'] == 1){
+            echo '<div class="row"><b>>> Thiết bị ra</b></div>';
+        }
+    ?>
      
-     <div class="row">
-     <b>>> Thiết bị ra</b>
-     </div>
-        <div class="land-1">
+    <div class="land-1">
 
 
 <?php
+    if($_SESSION['permission_control'] == 1){
 
-	PrintObjectDatabase($conn);
+
+       PrintObjectDatabase($conn);
+    }
 
 ?>
 

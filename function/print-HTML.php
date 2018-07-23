@@ -2,13 +2,16 @@
 
 function PrintObjectDatabase($conn) {
 
-	$sql = "SELECT *  FROM device where type <> 'obj-vao'";
+	// $sql = "SELECT *  FROM device where type <> 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " where d.type <> 'obj-vao'";
+//die($sql);
+// return;
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
 	    // output data of each row
 	    while($row = $result->fetch_assoc()) {
-	        PrintObject($row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["id"]);
+	        PrintObject($row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"]);
 	    }
 	} else {
 	    echo "0 results";
@@ -16,19 +19,21 @@ function PrintObjectDatabase($conn) {
 }
 
 // Print object
-function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $id) {
+function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid) {
+	$stateName = "";
+	$stateButton = "";
 
 	if($state) {
 		$stateButton = "switch-on";
 		$stateName = "turn-on";
 	}
-$buttonUpDown = "";
-if($objType == "obj-de-may-no"){
-	$buttonUpDown = 'obj-button-up-down-icon';
-	$objFalvor = '';
-}
+	$buttonUpDown = "";
+	if($objType == "obj-de-may-no"){
+		$buttonUpDown = 'obj-button-up-down-icon';
+		$objFalvor = '';
+	}
 
-	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6">';
+	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 parent-item" data-device_hostid="' . $device_hostid . '" data-deviceid="' . $deviceid . '" data-hostid="' . $hostid . '" data-type="' . $objType . '" data-objid="' . $objId . '">';
 		echo '<div class="object '.$objType . " " .$objFalvor. " " .$stateName.'" id="'. $objId .'">';
 			echo '<div class="obj-info">',
 	                '<p class="obj-header">'.$objName.'</p>';
@@ -169,13 +174,13 @@ break;
 // Hien thi thong tin vao
 function PrintObjectVao($conn) {
 
-	$sql = "SELECT *  FROM device where type='obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " where d.type = 'obj-vao'";
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
 	    // output data of each row
 	    while($row = $result->fetch_assoc()) {
-	        PrintVao($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $conn);
+	        PrintVao($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn);
 	    }
 	} else {
 	    echo "0 results";
@@ -183,12 +188,14 @@ function PrintObjectVao($conn) {
 }
 
 // Print object
-function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $conn) {
+function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn) {
 
 	$bg_cl = "background-color-off";
 	$stateView = "OFF";
 	$stateViewLower = "off";
 	$stateValue = "0";
+	$stateName = "";
+	$stateButton = "";
 
 	if($state) {
 		$stateButton = "switch-on";
@@ -226,7 +233,7 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 	}
 
 	// Check history
-	CheckAndCreateUpdateHistory($conn, $id, $stateValue);
+	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid);
 	/*
 	if($objId != "vao_dien_luoi" && $objId != "vao_tong_dai") {
 		CheckAndCreateUpdateHistory($conn, $id, $stateValue);
@@ -239,7 +246,7 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 		CheckAndCreateUpdateHistory($conn, $id, $newState);
 	}*/
 
-	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 ' . $bg_cl . '">';
+	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 ' . $bg_cl . ' parent-item" data-device_hostid="' . $device_hostid . '" data-deviceid="' . $deviceid . '" data-hostid="' . $hostid . '" data-type="' . $objType . '" data-objid="' . $objId . '">';
 		echo '<div class="object '.$objType . ' ' . $objType . "-" . $stateViewLower . " " .$objFalvor. " " .$stateName.'" id="'. $objId .'" mute="' . $mute . '">';
 			echo '<div class="obj-info">',
 	                '<p class="obj-header">'.$objName.'</p>';
@@ -254,17 +261,17 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 }
 
 // Hien thi thong tin vao
-function CheckAndCreateUpdateHistory($conn, $objId, $statusValue) {
+function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid) {
 	// Start ON
 	if($statusValue == '1'){
 		// echo 'statusValue = 1';
 
-		$sql = "SELECT * FROM history WHERE deviceid='". $objId . "' AND startdate is NOT NULL and enddate is NULL ORDER BY id LIMIT 1";
+		$sql = "SELECT * FROM history WHERE hostid=$hostid AND deviceid='". $objId . "' AND startdate is NOT NULL and enddate is NULL ORDER BY id LIMIT 1";
 		$result = $conn->query($sql);
 		if ($result->num_rows <= 0) {
 			//echo '$result->num_rows <= 0';
 			// Create new
-			$sql = "INSERT INTO history(deviceid,value,startdate,createdate) VALUES($objId, '$statusValue', SYSDATE(),SYSDATE())";
+			$sql = "INSERT INTO history(hostid,deviceid,value,startdate,createdate) VALUES($hostid,$objId, '$statusValue', SYSDATE(),SYSDATE())";
 			if ($conn->query($sql) === TRUE){}
 				// echo "Record inserted successfully";
 			else
@@ -275,7 +282,7 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue) {
 	else{
 		// echo 'statusValue = 0';
 		// = 0
-		$sql = "SELECT * FROM history WHERE deviceid='$objId' AND startdate is NOT NULL and enddate is NULL ORDER BY id LIMIT 1";
+		$sql = "SELECT * FROM history WHERE hostid=$hostid AND deviceid='$objId' AND startdate is NOT NULL and enddate is NULL ORDER BY id LIMIT 1";
 		$result = $conn->query($sql);
 		if ($result->num_rows > 0) {
 			 // output data of each row
@@ -305,9 +312,9 @@ function PrintList($conn, $count) {
 
 	if($count == 0){
 		// Get all
-		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid FROM history h left join device d on h.deviceid = d.id ORDER BY h.id DESC, h.startdate DESC";
+		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid FROM history h join device d on h.deviceid = d.id where h.hostid=" . $_SESSION['hostid'] . " ORDER BY h.id DESC, h.startdate DESC";
 	}else{
-		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid FROM history h left join device d on h.deviceid = d.id ORDER BY h.id DESC, h.startdate DESC LIMIT " . $count;
+		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid FROM history h join device d on h.deviceid = d.id where h.hostid=" . $_SESSION['hostid'] . " ORDER BY h.id DESC, h.startdate DESC LIMIT " . $count;
 	}
 
 	$result = $conn->query($sql);

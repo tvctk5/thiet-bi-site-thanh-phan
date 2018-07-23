@@ -4,7 +4,7 @@ define("serverName", "localhost");
 define("userName", "cantv");
 define("password", "123**abc");
 define("dbName", "trantu");
-define("TABLE", " device "); // need space between 'device'
+define("TABLE", " device_host "); // need space between 'device'
 define("tenBang", " DieuKhien ");
 
 function ConnectToSql() {
@@ -117,8 +117,8 @@ function DeleteObject($conn, $objName) {
 }
 
 // Update object
-function UpdateObject($conn, $objName, $propChange) {
-	$sql = "UPDATE " . TABLE . " SET $propChange WHERE name='$objName' ";
+function UpdateObject($conn, $objName, $propChange, $device_hostid) {
+	$sql = "UPDATE " . TABLE . " SET $propChange WHERE id=$device_hostid ";
 
 	echo $sql . PHP_EOL;
 	if ($conn->query($sql) === TRUE)
@@ -128,9 +128,9 @@ function UpdateObject($conn, $objName, $propChange) {
 }
 
 // Update value - dien
-function UpdateValueByObjId($conn, $objId, $value) {
+function UpdateValueByObjId($conn, $objId, $value, $device_hostid) {
 
-	$sql = "UPDATE " . TABLE . " SET value= $value WHERE objid='$objId' ";
+	$sql = "UPDATE " . TABLE . " SET value= $value WHERE id=$device_hostid ";
 	echo $sql . PHP_EOL;
 	if ($conn->query($sql) === TRUE)
 	    echo "Record updated successfully" . PHP_EOL ;
@@ -139,9 +139,9 @@ function UpdateValueByObjId($conn, $objId, $value) {
 }
 
 // Update value mute
-function UpdateMuteByObjId($conn, $objId, $objtype,$value) {
+function UpdateMuteByObjId($conn, $objId, $objtype,$value, $device_hostid) {
 
-	$sql = "UPDATE " . TABLE . " SET value= $value WHERE objid='$objId' AND type='$objtype'";
+	$sql = "UPDATE " . TABLE . " SET value= $value WHERE id='$device_hostid'";
 	echo $sql . PHP_EOL;
 	if ($conn->query($sql) === TRUE)
 	    echo "Record updated successfully" . PHP_EOL ;
@@ -150,9 +150,9 @@ function UpdateMuteByObjId($conn, $objId, $objtype,$value) {
 }
 
 // Update value mute
-function UpdateRangeDienMayNo($conn, $Id, $value) {
+function UpdateRangeDienMayNo($conn, $Id, $value, $device_hostid) {
 
-	$sql = "UPDATE " . TABLE . " SET amplitude= $value WHERE id=$Id";
+	$sql = "UPDATE " . TABLE . " SET amplitude= $value WHERE id=$device_hostid";
 	echo $sql . PHP_EOL;
 	if ($conn->query($sql) === TRUE)
 	    echo "Range Dien may no updated successfully" . PHP_EOL ;

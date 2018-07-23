@@ -169,7 +169,9 @@ $(".submit-button").on("click", function(){
 		return 0;
 	}
 	var objId = $(this).attr("id-sub");
-	SendSpecialState( name + ":" + status, objId);
+	var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
+
+	SendSpecialState( name + ":" + status, objId, device_hostid);
 });
 
 if(TOUCHSCREEN) {
@@ -181,15 +183,16 @@ function TurnOn(OBJECT) {
 		return;
 
 	var objId = $(OBJECT).attr("id");
+	var device_hostid = $(OBJECT).parents(".parent-item").first().data("device_hostid");
 
 	$(OBJECT).addClass("turn-on").find(".switch-button:not('.type-turn')").addClass("switch-on");
 	var objName = $(OBJECT).find(".obj-header").html();
 
 	if($(OBJECT).hasClass("obj-slider")) {
 		var amplitude = parseInt($(OBJECT).find(".counter").html());
-		UpdateObject(objName.toString(), objId,"state=1,amplitude=" + amplitude);
+		UpdateObject(objName.toString(), objId,"state=1,amplitude=" + amplitude, device_hostid);
 	}else
-		UpdateObject(objName.toString(), objId,"state=1");
+		UpdateObject(objName.toString(), objId,"state=1", device_hostid);
 	
 }
 
@@ -199,13 +202,17 @@ function TurnOff(OBJECT) {
 	var objName = $(OBJECT).find(".obj-header").html();
 	$(OBJECT).find(".switch-button").removeClass("switch-on");
 	var objId = $(OBJECT).attr("id");
-	UpdateObject(objName.toString(), objId,"state=0");
+
+	var device_hostid = $(OBJECT).parents(".parent-item").first().data("device_hostid");
+
+	UpdateObject(objName.toString(), objId,"state=0", device_hostid);
 }
 
 // update info of object to server
-function UpdateObject(objName, objId, strUpdate) {
+function UpdateObject(objName, objId, strUpdate, device_hostid) {
 	console.log("objName: " + objName);
 	console.log("strUpdate: " + strUpdate);
+	console.log("device_hostid: " + device_hostid);
 	
 	var nameFile = objId;
 
@@ -215,7 +222,8 @@ function UpdateObject(objName, objId, strUpdate) {
 			type : "update",
 			name : objName,
 			update : strUpdate,
-			nameFile : nameFile
+			nameFile : nameFile,
+			device_hostid: device_hostid
 		}
 	).fail(function(){
 		console.log("UpdateObject fail");
@@ -225,7 +233,7 @@ function UpdateObject(objName, objId, strUpdate) {
 }
 
 // Function send special state
-function SendSpecialState(status, objId) {
+function SendSpecialState(status, objId, device_hostid) {
 	console.log("SendSpecialState status: " + status);
 
 	var nameFile = objId;
@@ -236,7 +244,8 @@ function SendSpecialState(status, objId) {
 		{
 			type : "status",
 			state : status,
-			nameFile : nameFile
+			nameFile : nameFile,
+			device_hostid : device_hostid
 		}	
 	).fail(function(){
 		console.log("SendSpecialState fail");
@@ -249,6 +258,7 @@ function SendSpecialState(status, objId) {
 $(".class-ra_cau_dao input").on("click", function(){
 	var OBJECT = $(this);
 	var value = OBJECT.val();
+	var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
 
 	// var status = $(OBJECT).find("input[name='state']").val();
 	$.post(
@@ -256,7 +266,8 @@ $(".class-ra_cau_dao input").on("click", function(){
 		{
 			type : "dien",
 			value : value,
-			objid : "ra_cau_dao"
+			objid : "ra_cau_dao",
+			device_hostid : device_hostid
 		}	
 	).fail(function(){
 		console.log(".class-ra_cau_dao input set to fail");
@@ -269,6 +280,7 @@ $(".class-ra_cau_dao input").on("click", function(){
 $(".class-ra_1 input").on("click", function(){
 	var OBJECT = $(this);
 	var value = OBJECT.val();
+	var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
 
 	// var status = $(OBJECT).find("input[name='state']").val();
 	$.post(
@@ -276,7 +288,8 @@ $(".class-ra_1 input").on("click", function(){
 		{
 			type : "ra_1_tudong_dieuhoa_quat",
 			value : value,
-			objid : "ra_1"
+			objid : "ra_1",
+			device_hostid : device_hostid
 		}	
 	).fail(function(){
 		console.log(".class-ra_1 input set to fail");
@@ -304,6 +317,7 @@ $(".fa-volume").on("click", function(){
 	var OBJECT = $(this);
 	var id = OBJECT.attr("objid");
 	var check_volumn_on = $(this).hasClass("obj-vao-volumn-on");
+	var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
 	
 	if(OBJECT.hasClass("fa-volume-up")){
 		OBJECT.removeClass("fa-volume-up").addClass("fa-volume-off");
@@ -312,7 +326,7 @@ $(".fa-volume").on("click", function(){
 			ion.sound.stop(id);
 		}
 		// Update DB
-		pushMute('1', 'obj-vao', id);
+		pushMute('1', 'obj-vao', id, device_hostid);
 	}else{
 		OBJECT.removeClass("fa-volume-off").addClass("fa-volume-up");
 		// Play
@@ -320,7 +334,7 @@ $(".fa-volume").on("click", function(){
 			ion.sound.play(id);
 		}
 		// Update DB
-		pushMute('0', 'obj-vao', id);
+		pushMute('0', 'obj-vao', id, device_hostid);
 	}
 });
 
@@ -374,6 +388,8 @@ $("#deMayNo").change(function() {
 	notReload = true;
 	output.value = this.value;
 	var id = $(this).attr("deviceId");
+	var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
+
 	console.log("Device id: " + id)
 	countRangeChange++;
 
@@ -382,7 +398,8 @@ $("#deMayNo").change(function() {
 		{
 			type : "range_demayno",
 			value : this.value,
-			id : id
+			id : id,
+			device_hostid : device_hostid
 		}	
 	).fail(function(){
 		console.log("Range DE MAY NO failed");
@@ -398,14 +415,15 @@ $("#deMayNo").change(function() {
 
 });
 
-function pushMute(value, objtype, objid){
+function pushMute(value, objtype, objid, device_hostid){
 	$.post(
 		"function/data.php",
 		{
 			type : "mute",
 			value : value,
 			objtype : "obj-vao",
-			objid : objid
+			objid : objid,
+			device_hostid : device_hostid
 		}	
 	).fail(function(){
 		console.log("Set mute failed");
@@ -422,6 +440,8 @@ function setRingSound(){
 		
 		var id = $(this).attr("id");
 		var mute = $(this).attr("mute");
+		var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
+
 		var check_on = $(this).hasClass("obj-vao-on");
 		var cssClass = "fa-volume-off";
 		var cssClass_on_off = "obj-vao-volumn-off";
