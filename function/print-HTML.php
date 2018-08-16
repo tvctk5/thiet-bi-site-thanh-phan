@@ -76,7 +76,7 @@ function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, 
 				echo '</div>';
 
 				echo '<div class="slidecontainer">
-				<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider" id="deMayNo" deviceId="'.$id.'">
+				<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider" id="deMayNo" deviceId="'.$deviceid.'">
 			  </div>';
 			}
 
@@ -322,7 +322,7 @@ function PrintList($conn, $count) {
 	if ($result->num_rows > 0) {
 	    // output data of each row
 	    while($row = $result->fetch_assoc()) {
-	        PrintLine($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["deviceid"], $row["objid"], $row["value"], $row["startdate"], $row["enddate"]);
+	        PrintLine($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"]);
 	    }
 	} else {
 	    echo "0 row";
@@ -330,7 +330,7 @@ function PrintList($conn, $count) {
 }
 
 // Print object
-function PrintLine($Id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $deviceid, $objId, $value, $startdate, $enddate) {
+function PrintLine($Id, $objName, $state, $startdate, $enddate) {
 	$statuName = 'OFF';
 	if($state == "1"){
 		$statuName = 'ON';

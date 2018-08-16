@@ -160,10 +160,10 @@ echo '<input type="text" id="end_date_search" name="end_date_search" placeholder
         <th>
             Id
         </th>
-        <th>
+        <!--<th>
             Trạm Id
         </th>
-        <!--th>
+        th>
             Device Id
         </th-->
         <th>
@@ -182,7 +182,7 @@ echo '<input type="text" id="end_date_search" name="end_date_search" placeholder
 <?php
 // BƯỚC 6: HIỂN THỊ DANH SÁCH TIN TỨC
 while ($row = mysqli_fetch_assoc($result)){
-    PrintLine($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["deviceid"], $row["objid"], $row["value"], $row["startdate"], $row["enddate"]);
+    PrintLine($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"]);
 }
 ?>
 <tr>
