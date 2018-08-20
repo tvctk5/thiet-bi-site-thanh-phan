@@ -233,7 +233,7 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 	}
 
 	// Check history
-	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid);
+	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid, $device_hostid);
 	/*
 	if($objId != "vao_dien_luoi" && $objId != "vao_tong_dai") {
 		CheckAndCreateUpdateHistory($conn, $id, $stateValue);
@@ -261,7 +261,8 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 }
 
 // Hien thi thong tin vao
-function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid) {
+function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $device_hostId) {
+	$deviceId = $objId;
 	// Start ON
 	if($statusValue == '1'){
 		// echo 'statusValue = 1';
@@ -272,7 +273,11 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid) {
 			//echo '$result->num_rows <= 0';
 			// Create new
 			$sql = "INSERT INTO history(hostid,deviceid,value,startdate,createdate) VALUES($hostid,$objId, '$statusValue', SYSDATE(),SYSDATE())";
-			if ($conn->query($sql) === TRUE){}
+			if ($conn->query($sql) === TRUE){
+				// SMS
+				$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .")";
+				if ($conn->query($sql) === TRUE){}
+			}
 				// echo "Record inserted successfully";
 			else
 				echo "Error inserting record: " . $conn->error;
@@ -289,7 +294,11 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid) {
 			 while($row = $result->fetch_assoc()) {
 				 $id = $row["id"];
 				$sql = "UPDATE history SET value='$statusValue', enddate=SYSDATE(), updatedate=SYSDATE() WHERE id=$id";
-				if ($conn->query($sql) === TRUE){}
+				if ($conn->query($sql) === TRUE){
+					// SMS
+					$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .")";
+					if ($conn->query($sql) === TRUE){}
+				}
 					//echo "Record updated successfully";
 				else
 					echo "Error updating record: " . $conn->error;
