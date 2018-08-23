@@ -1,7 +1,7 @@
 <?php 
 
 define("serverName", "localhost");
-define("userName", "cantv");
+define("userName", "root");
 define("password", "123**abc");
 define("dbName", "trantu");
 define("TABLE", " device_host "); // need space between 'device'
@@ -117,12 +117,13 @@ function DeleteObject($conn, $objName) {
 }
 
 // Update object
-function UpdateObject($conn, $objName, $propChange, $device_hostid) {
+function UpdateObject($conn, $objName, $propChange, $device_hostid, $objtype, $value, $hostId, $deviceId) {
 	$sql = "UPDATE " . TABLE . " SET $propChange WHERE id=$device_hostid ";
 
 	echo $sql . PHP_EOL;
-	if ($conn->query($sql) === TRUE)
-	    echo "Record updated successfully" . PHP_EOL ;
+	if ($conn->query($sql) === TRUE){
+		echo "Record updated successfully" . PHP_EOL ;
+	}
 	else
 	    echo "Error updating record: " . $conn->error . PHP_EOL;
 }

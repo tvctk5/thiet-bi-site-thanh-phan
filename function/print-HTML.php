@@ -197,6 +197,65 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 	$stateName = "";
 	$stateButton = "";
 
+	if($state == 1) {
+		$stateButton = "switch-on";
+		$stateName = "turn-on";
+	}
+
+	$mute = $value;
+	if($mute == null){
+		$mute = '0';
+	}
+	
+	if($state == 1) {
+		$bg_cl = "background-color-on";
+		$stateView = "ON";
+		$stateViewLower = "on";
+		$stateValue = "1";
+	}
+
+	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 ' . $bg_cl . ' parent-item" data-device_hostid="' . $device_hostid . '" data-deviceid="' . $deviceid . '" data-hostid="' . $hostid . '" data-type="' . $objType . '" data-objid="' . $objId . '">';
+		echo '<div class="object '.$objType . ' ' . $objType . "-" . $stateViewLower . " " .$objFalvor. " " .$stateName.'" id="'. $objId .'" mute="' . $mute . '">';
+			echo '<div class="obj-info">',
+	                '<p class="obj-header">'.$objName.'</p>';
+
+			echo ' <div class="clearfix"><b>' . $stateView . '</b></div>';
+
+	        echo ' <div class="clearfix"></div>';
+			echo '</div>';
+		echo '</div>';
+	echo '</div>';
+	
+}
+
+
+// Hien thi thong tin vao
+function WriteHistoryObjectVao($conn, $hostid) {
+	
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " where d.type = 'obj-vao'";
+	$result = $conn->query($sql);
+
+	if ($result->num_rows > 0) {
+		// output data of each row
+		while($row = $result->fetch_assoc()) {
+			WriteHistory($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn);
+		}
+	} else {
+		echo "0 results";
+	}
+}
+
+
+// Print object
+function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn) {
+	
+	$bg_cl = "background-color-off";
+	$stateView = "OFF";
+	$stateViewLower = "off";
+	$stateValue = "0";
+	$stateName = "";
+	$stateButton = "";
+
 	if($state) {
 		$stateButton = "switch-on";
 		$stateName = "turn-on";
@@ -204,7 +263,7 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 	$link = 'files/vao/' . $objId .'.txt';
 	// echo $link .'<br>';
 	$content = file_get_contents($link);
-	 // echo 'dâta: '. $content[0] . '<br>';
+		// echo 'dâta: '. $content[0] . '<br>';
 
 	$mute = $value;
 	if($mute == null){
@@ -234,35 +293,21 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 
 	// Check history
 	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid, $device_hostid);
-	/*
-	if($objId != "vao_dien_luoi" && $objId != "vao_tong_dai") {
-		CheckAndCreateUpdateHistory($conn, $id, $stateValue);
-	} else{
-		$newState = "0";
-		if($stateValue == "0"){
-			$newState = "1";
-		}
-
-		CheckAndCreateUpdateHistory($conn, $id, $newState);
-	}*/
-
-	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 ' . $bg_cl . ' parent-item" data-device_hostid="' . $device_hostid . '" data-deviceid="' . $deviceid . '" data-hostid="' . $hostid . '" data-type="' . $objType . '" data-objid="' . $objId . '">';
-		echo '<div class="object '.$objType . ' ' . $objType . "-" . $stateViewLower . " " .$objFalvor. " " .$stateName.'" id="'. $objId .'" mute="' . $mute . '">';
-			echo '<div class="obj-info">',
-	                '<p class="obj-header">'.$objName.'</p>';
-
-			echo ' <div class="clearfix"><b>' . $stateView . '</b></div>';
-
-	        echo ' <div class="clearfix"></div>';
-			echo '</div>';
-		echo '</div>';
-	echo '</div>';
-	
 }
 
 // Hien thi thong tin vao
 function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $device_hostId) {
 	$deviceId = $objId;
+
+	// Update device_host
+	$sql = "UPDATE device_host SET state=" . $statusValue . ", updatedate=SYSDATE() WHERE id=" . $device_hostId;
+	if ($conn->query($sql) === TRUE){
+		echo "device_host: Record updated successfully" . PHP_EOL ;
+	}
+	else
+	    echo "device_host: Error updating record: " . $conn->error . PHP_EOL;
+
+	// Create history
 	// Start ON
 	if($statusValue == '1'){
 		// echo 'statusValue = 1';
