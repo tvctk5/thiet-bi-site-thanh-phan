@@ -8,6 +8,7 @@ include 'function/print-HTML.php';
 include 'sql/sql-function.php';
 
 $conn = ConnectDatabse();
+
 //tiến hành kiểm tra là người dùng đã đăng nhập hay chưa
 //nếu chưa, chuyển hướng người dùng ra lại trang đăng nhập
 if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
@@ -40,7 +41,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
     $_SESSION['hostid'] = $hostid;
 
     // Kiểm tra quyền
-    $sql = "select * from user_host where userId =". $user["Id"] . " and hostId=". $hostid . " LIMIT 1";
+    $sql = "select uh.*,h.name as host_name from user_host uh join host h on h.id=uh.hostId where uh.userId =". $user["Id"] . " and uh.hostId=". $hostid . " LIMIT 1";
     $num_rows = mysqli_num_rows($query);
 
     if ($num_rows == 0) {
@@ -60,6 +61,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
 
     $_SESSION['permission_view'] = $user_host["view"];
     $_SESSION['permission_control'] = $user_host["control"];
+    $_SESSION['host_name'] = $user_host["host_name"];
 
     if($user_host["view"] == 0){
         $_SESSION['username'] = NULL;
@@ -82,10 +84,12 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
 <html lang="en"> 
   <head>
     <meta charset="utf-8">
-    <meta refreshpage="true" content="5">
+    <meta refreshpage="true" content="500">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Tran Van Tu</title>
+    <?php
+        echo "<title>Trang chủ - Trạm: " . $_SESSION['host_name'] . "</title>"
+    ?>
     
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="css/google-font-css.css?family=Open+Sans">
@@ -124,14 +128,14 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
           <?php
           echo 'Xin chào <b style="color:yellow;">' . $_SESSION['username'] . '</b>'
           ?>
-          <div><a href='logout.php' style='color: white !important;'>Logout</a> -  <a href='changepassword.php'  style='color: white !important;'>Change password</a></div>
+          <div><a href='logout.php' style='color: white !important;'>Thoát</a> -  <a href='changepassword.php'  style='color: white !important;'>Đổi mật khẩu</a></div>
         </div>
         <div class="navbar-header">
-        
-<center><b style='color: cyan !important;'> Điều khiển thiết bị</b>  
-
-
-	</div>
+            <?php 
+                echo "<div style='color: cyan !important;'> Điều khiển: <span class='host-name'>".$_SESSION['host_name']."</span> </div>";
+                echo "<div class='host-name-mobile'><span>".$_SESSION['host_name']."</span> </div>";
+            ?>
+	    </div>
       </div>
     </nav>
     <!-- Conainer -->
@@ -171,8 +175,8 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
 <!--========================================================-->
 
 	 <div class="row">
-     <div class="row">
-     <b>>> Thiết bị vào</b>
+     <div class="row device-group">
+     <b>Thiết bị vào</b>
      </div>
      <?php
 
@@ -185,7 +189,7 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
 	 <div class="row">
      <?php
         if($_SESSION['permission_control'] == 1){
-            echo '<div class="row"><b>>> Thiết bị ra</b></div>';
+            echo '<div class="row device-group"><b>Thiết bị ra</b></div>';
         }
     ?>
      
@@ -203,27 +207,27 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
 
 <div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 <hr/>
-<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12' style='padding:10px;text-align:right; margin: 5px; background-color: #c9d9e0;'><!--button id="export" data-export="export">Export (Top 20)</button--> (<a href='export.php' target='_blank'>Export - All</a>)</div>
+<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12' style='padding:10px;text-align:right; margin: 5px; background-color: #c9d9e0;'><!--button id="export" data-export="export">Export (Top 20)</button--> (<a href='export.php' target='_blank'> >> Xem thêm</a>)</div>
 <hr/>
 <table class='tbllistitem' id="export_table"> 
     <tr>
         <th>
-            Id
+            #
         </th>
         <!--th class='hidden'>
             Device Id
         </th -->
         <th>
-            Name
+            Cảnh báo
         </th>
         <th>
-            Status
+            Trạng thái
         </th>
         <th>
-            Start Date
+            T/g Bắt đầu
         </th>
         <th>
-            Finish Date
+            T/g Kết thúc
         </th>
     </tr>
 <?php

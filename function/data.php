@@ -76,12 +76,12 @@
 
 			UpdateMuteByObjId($conn, $objid, $objtype, $value, $device_hostid);
 		}
-		else if($_REQUEST["type"]=="range_demayno") {
+		else if($_REQUEST["type"]=="range_change") {
 			$value = $_REQUEST["value"];
 			$id = $_REQUEST["id"];
 			$device_hostid = $_REQUEST["device_hostid"];
 
-			UpdateRangeDienMayNo($conn, $id, $value, $device_hostid);
+			UpdateRangeValue($conn, $id, $value, $device_hostid);
 		}
 	}
 	

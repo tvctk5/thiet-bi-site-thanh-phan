@@ -2,8 +2,8 @@
 
 define("serverName", "localhost");
 define("userName", "root");
-define("password", "123**abc");
-define("dbName", "trantu");
+define("password", "");
+define("dbName", "dieukhien");
 define("TABLE", " device_host "); // need space between 'device'
 define("tenBang", " DieuKhien ");
 
@@ -13,7 +13,7 @@ function ConnectToSql() {
 	    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
 	else;
 		// echo "Connection to mysql success !" . PHP_EOL;
-
+	mysqli_set_charset($conn, 'UTF8');
 	return $conn;
 }
 
@@ -29,6 +29,8 @@ function ConnectDatabse() {
 	    die("Connection failed: " . mysqli_connect_error());
 	else;
 		// echo "Connection database success !\n";
+
+	mysqli_set_charset($conn, 'UTF8');
 	return $conn;
 }
 
@@ -150,8 +152,8 @@ function UpdateMuteByObjId($conn, $objId, $objtype,$value, $device_hostid) {
 	    echo "Error updating record: " . $conn->error . PHP_EOL;
 }
 
-// Update value mute
-function UpdateRangeDienMayNo($conn, $Id, $value, $device_hostid) {
+// Update range value
+function UpdateRangeValue($conn, $Id, $value, $device_hostid) {
 
 	$sql = "UPDATE " . TABLE . " SET amplitude= $value WHERE id=$device_hostid";
 	echo $sql . PHP_EOL;

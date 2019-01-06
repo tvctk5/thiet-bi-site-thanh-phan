@@ -2,6 +2,7 @@ $(document).ready(function() {
 var notReload = false;
 var maxTime = 7; // Seconds
 var countTime = 0;
+var lastDownItem = null;
 
 // check if device is touch screen
 var TOUCHSCREEN = ('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0);
@@ -58,15 +59,20 @@ var bPopup;
 $(".obj-button-up-down-icon").bind("click",function(e) {
 	e.preventDefault();
 
-	var getInput = $("input[id='obj-de-may-no-input']").val();
+	var getInput = $("input.range-value-input-" + $(this).attr("rangeInputId")).val();
 	if(getInput == ""){
 		alert("Yêu cầu nhập số giây hợp lệ");
 		return;
 	}
 
 	try{
+		if(isNaN(getInput)){
+			alert("Yêu cầu nhập số giây hợp lệ");
+			return;
+		}
+
 		maxTime = parseInt(getInput);
-		if(isNaN(maxTime)){
+		if(isNaN(maxTime) || maxTime > 15){
 			alert("Yêu cầu nhập số giây hợp lệ");
 			return;
 		}
@@ -76,9 +82,12 @@ $(".obj-button-up-down-icon").bind("click",function(e) {
 	}
 
 	$(this).addClass("obj-button-up-down-mousedowning");
+	lastDownItem = $(this);
+	// console.log("$(this).closest:");
+	// console.log($(this).closest(".object"))
 	TurnOn($(this).closest(".object"));
-	$('.obj-button-up-down').addClass("turn-on");
-	console.log("Mouse down");
+	$(this).find('.obj-button-up-down').addClass("turn-on");
+	console.log("Mouse down. Waiting for " + maxTime + " seconds");
 	notReload = true;
 
 	console.log("maxTime:" + maxTime);
@@ -179,8 +188,10 @@ if(TOUCHSCREEN) {
 }
 // Function turn on
 function TurnOn(OBJECT) {
-	if( $(OBJECT).hasClass("turn-on") )
+	if( $(OBJECT).hasClass("turn-on") ){
+		console.log("$(OBJECT).hasClass('turn-on') == true; return;");
 		return;
+	}
 
 	var objId = $(OBJECT).attr("id");
 	var device_hostid = $(OBJECT).parents(".parent-item").first().data("device_hostid");
@@ -228,7 +239,7 @@ function UpdateObject(objName, objId, strUpdate, device_hostid) {
 	).fail(function(){
 		console.log("UpdateObject fail");
 	}).always(function(){
-		console.log("UpdateObject always");
+		console.log("UpdateObject successfully");
 	});
 }
 
@@ -360,7 +371,7 @@ setInterval(function(){
 		countTime ++;
 		if(countTime == maxTime){
 			// Update to 0
-			$(".obj-button-up-down-icon").trigger("off");
+			lastDownItem.trigger("off");
 
 			bPopup.close();
 		}
@@ -376,15 +387,17 @@ setInterval(function(){
 }, 1000);
 
 // range --------------------------------------------------------------
-var slider = document.getElementById("deMayNo");
-var output = document.getElementById("obj-de-may-no-input");
+// var slider = document.getElementById("deMayNo");
+// var output = document.getElementById("obj-de-may-no-input");
 
 // output.innerHTML = slider.value; // Display the default slider value
 
 // Update the current slider value (each time you drag the slider handle)
 var countRangeChange = 0;
 // slider.oninput = function() {
-$("#deMayNo").change(function() {
+$(".slider-change-range-max-min").change(function() {
+	
+	var output = document.getElementById($(this).attr("textViewId"));
 	notReload = true;
 	output.value = this.value;
 	var id = $(this).attr("deviceId");
@@ -396,7 +409,7 @@ $("#deMayNo").change(function() {
 	$.post(
 		"function/data.php",
 		{
-			type : "range_demayno",
+			type : "range_change",
 			value : this.value,
 			id : id,
 			device_hostid : device_hostid

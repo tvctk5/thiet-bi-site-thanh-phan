@@ -1,7 +1,3 @@
-<!-- 	Nguyen Hai Duong, September 2016 
- 			GNU LESSER GENERAL PUBLIC LICENSE Version 2.1, February 1999
--->
-
 <?php 
 
 session_start();
@@ -90,7 +86,7 @@ $start = ($current_page - 1) * $limit;
 
 // BƯỚC 5: TRUY VẤN LẤY DANH SÁCH TIN TỨC
 // Có limit và start rồi thì truy vấn CSDL lấy danh sách tin tức
-$result = mysqli_query($conn, "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid FROM history h left join device d on h.deviceid = d.id  WHERE 1=1 " . $date_condition . "ORDER BY h.id DESC, h.startdate DESC LIMIT $start, $limit");
+$result = mysqli_query($conn, "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid, h.hostid as hostid, ho.name as host_name, '' as note FROM history h join host ho on ho.id=h.hostid left join device d on h.deviceid = d.id  WHERE 1=1 " . $date_condition . "ORDER BY h.id DESC, h.startdate DESC LIMIT $start, $limit");
 
 ?>
 
@@ -101,8 +97,9 @@ $result = mysqli_query($conn, "SELECT h.id, h.startdate, h.enddate, h.value, h.v
     <meta http-equiv="refresh" content="10000">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>History export</title>
-    
+    <?php
+        echo "<title>Lịch sử - " . $_SESSION['host_name'] . "</title>"
+    ?>
     <!-- CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
     <link rel="stylesheet" type="text/css" href="fonts/font-awesome/css/font-awesome.min.css">
@@ -129,7 +126,9 @@ $result = mysqli_query($conn, "SELECT h.id, h.startdate, h.enddate, h.value, h.v
 
 <div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 <!--========================================================-->
-<h2>LỊCH SỬ</h2>
+<?php
+    echo "<h3><a href='index.php'>Trang chủ</a> >> Lịch sử - " . $_SESSION['host_name'] . "</h3>"
+?>
 <!--========================================================-->  
 <hr/>
 <form method="POST" action="export.php">
@@ -157,32 +156,38 @@ echo '<input type="text" id="end_date_search" name="end_date_search" placeholder
 <hr/>
 <table class='tbllistitem' id="export_table"> 
     <tr>
-        <th>
-            Id
+    <th>
+            #
         </th>
-        <!--<th>
+        <th>
             Trạm Id
         </th>
-        th>
-            Device Id
-        </th-->
         <th>
-            Name
+            Trạm
         </th>
         <th>
-            Status
+            Cảnh báo
+        </th>
+        <th style='display:none;'>
+            Trạng thái
         </th>
         <th>
-            Start Date
+            T/g Bắt đầu
         </th>
         <th>
-            Finish Date
+            T/g Kết thúc
+        </th>
+        <th>
+            Thời gian
+        </th>
+        <th>
+            Ghi chú
         </th>
     </tr>
 <?php
 // BƯỚC 6: HIỂN THỊ DANH SÁCH TIN TỨC
 while ($row = mysqli_fetch_assoc($result)){
-    PrintLine($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"]);
+    PrintLine_ExportPage($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"], $row["hostid"], $row["host_name"], $row["note"]);
 }
 ?>
 <tr>
@@ -200,6 +205,7 @@ while ($row = mysqli_fetch_assoc($result)){
             // Lặp khoảng giữa
             $overload = false;
             $flag = false;
+            $flag_space = false;
 
             for ($i = 1; $i <= $total_page; $i++){
                 if($total_page > 15){
@@ -207,7 +213,11 @@ while ($row = mysqli_fetch_assoc($result)){
                 }
                 
                 if($overload && $i != 1 && $i != 2 && $current_page != $i && $i != ($total_page -1) && $i != $total_page){
-                    echo '...';
+                    if($flag_space == false){
+                        echo '...';
+                        $flag_space = true;
+                    }
+
                     continue;
                 }
 

@@ -22,15 +22,16 @@ function PrintObjectDatabase($conn) {
 function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid) {
 	$stateName = "";
 	$stateButton = "";
-
+	// echo "----------:". $state;
 	if($state) {
 		$stateButton = "switch-on";
 		$stateName = "turn-on";
 	}
 	$buttonUpDown = "";
-	if($objType == "obj-de-may-no"){
+	if($objType == "obj-de-may-no" || $objType == "obj-ra-say-may-no" || $objType == "obj-ra-tat-may-no"){
 		$buttonUpDown = 'obj-button-up-down-icon';
 		$objFalvor = '';
+		$stateName = "";
 	}
 
 	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 parent-item" data-device_hostid="' . $device_hostid . '" data-deviceid="' . $deviceid . '" data-hostid="' . $hostid . '" data-type="' . $objType . '" data-objid="' . $objId . '">';
@@ -38,19 +39,20 @@ function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, 
 			echo '<div class="obj-info">',
 	                '<p class="obj-header">'.$objName.'</p>';
 
-	            if( $objType != "obj-button")
-	            echo'<p class="obj-counter-percent">', 
-	                	//'<i class="fa '.$icon.'"></i>',
-	                	//'<b class="counter">'.$amplitude.'</b>',
-	                '</p>';
-			echo  '</div>';
+	            if( $objType != "obj-button") {
+					echo'<p class="obj-counter-percent">', 
+							//'<i class="fa '.$icon.'"></i>',
+							//'<b class="counter">'.$amplitude.'</b>',
+						'</p>';
+					echo  '</div>';
+				}
 			
 			if($objType == "obj-radiobutton"){
 				echo '<div class="obj-timer ignore-onclick">';
 				echo '<div class="switch-button '.$stateButton.'"></div>';
 				echo '</div>';
 			} else {
-				echo '<div class="obj-timer '. $buttonUpDown .'">
+				echo '<div class="obj-timer '. $buttonUpDown .'" id="up-down-button-'. $device_hostid .'" rangeInputId="'. $device_hostid .'">
 						<svg class="timer-progress" viewbox="0 0 82 82">
 							<circle class="progress-bg" r="39" cx="41" cy="41" stroke-dasharray="245"></circle>
 							<circle class="progress-bar" r="39" cx="41" cy="41" stroke-dasharray="245"></circle>
@@ -70,99 +72,125 @@ function PrintObject($objType, $objName, $state, $objFalvor, $amplitude, $icon, 
 
 			}
 			
-		if($objType == "obj-de-may-no"){
-				echo '<div class="obj-de-may-no" style="padding-left: 20px;color:yellow">';
-				echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-de-may-no-input" name="obj-de-may-no-input" value="' . $amplitude . '"/> (giây)';
-				echo '</div>';
+		// if($objType == "obj-de-may-no"){
+		// 	echo '<div class="obj-de-may-no" style="padding-left: 20px;color:yellow">';
+		// 	echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-de-may-no-input" name="obj-de-may-no-input" value="' . $amplitude . '"/> (giây)';
+		// 	echo '</div>';
 
-				echo '<div class="slidecontainer">
-				<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider" id="deMayNo" deviceId="'.$deviceid.'">
-			  </div>';
-			}
+		// 	echo '<div class="slidecontainer">
+		// 	<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider" id="deMayNo" deviceId="'.$deviceid.'">
+		// 	</div>';
+		// }
 
 
 switch($objType){
-case "obj-radiobutton": 
-if($objId == "ra_cau_dao"){
+	case "obj-radiobutton": 
+		if($objId == "ra_cau_dao"){
+			$selected_dienmayno = "";
+			$selected_dienluoi = "";
 
-
-$selected_dienmayno = "";
-$selected_dienluoi = "";
-
-if($value == "0") {
-$selected_dienmayno = "checked";
-	}else{
-$selected_dienluoi = "checked";
-}
-
-echo '<div class="class-ra_cau_dao">';
-
-echo '<div class="radio">';
-echo '<label for="dien-may-no"><input id="dien-may-no" name="ra_cau_dao" type="radio"' . $selected_dienmayno .' value="0" class="" /> Dien may no</label>';
-echo '</div>';
-
-echo '<div class="radio">';
-echo '<label for="dien-luoi"><input id="dien-luoi" name="ra_cau_dao" type="radio" ' . $selected_dienluoi .' value="1" /> Dien luoi</label>';
-echo '</div>';
-
-echo '</div>';
-} else{
-	if($objId == "ra_1"){
-		$selected_tudong = "";
-		$selected_dieuhoa = "";
-		$selected_quat = "";
-		
-		if($value == "0") {
-		$selected_tudong = "checked";
+			if($value == "0") {
+				$selected_dienmayno = "checked";
 			}else{
-				if($value == "1") {
-		$selected_dieuhoa = "checked";
-				} else{
-					$selected_quat = "checked";
+				$selected_dienluoi = "checked";
+			}
+
+			echo '<div class="class-ra_cau_dao">';
+
+			echo '<div class="radio">';
+			echo '<label for="dien-may-no"><input id="dien-may-no" name="ra_cau_dao" type="radio"' . $selected_dienmayno .' value="0" class="" />Điện máy nổ</label>';
+			echo '</div>';
+
+			echo '<div class="radio">';
+			echo '<label for="dien-luoi"><input id="dien-luoi" name="ra_cau_dao" type="radio" ' . $selected_dienluoi .' value="1" />Điện lưới</label>';
+			echo '</div>';
+
+			echo '</div>';
+		} else{
+			if($objId == "ra_1"){
+				$selected_tudong = "";
+				$selected_dieuhoa = "";
+				$selected_quat = "";
+				
+				if($value == "0") {
+					$selected_tudong = "checked";
+				}else{
+					if($value == "1") {
+						$selected_dieuhoa = "checked";
+					} else{
+						$selected_quat = "checked";
+					}
+				}
+				
+				echo '<div class="class-ra-objradiobutton class-ra_1">';
+				
+				echo '<div class="radio">';
+				echo '<label for="tu-dong"><input id="tu-dong" name="ra_1" type="radio"' . $selected_tudong .' value="0" class="" /> Tự động</label>';
+				echo '</div>';
+				
+				echo '<div class="radio">';
+				echo '<label for="dieu-hoa"><input id="dieu-hoa" name="ra_1" type="radio" ' . $selected_dieuhoa .' value="1" /> Điều hòa</label>';
+				echo '</div>';
+				
+				echo '<div class="radio">';
+				echo '<label for="quat"><input id="quat" name="ra_1" type="radio" ' . $selected_quat .' value="2" /> Quạt</label>';
+				echo '</div>';
+				
+				echo '</div>';
 				}
 		}
-		
-		echo '<div class="class-ra-objradiobutton class-ra_1">';
-		
-		echo '<div class="radio">';
-		echo '<label for="tu-dong"><input id="tu-dong" name="ra_1" type="radio"' . $selected_tudong .' value="0" class="" /> Tu dong</label>';
+
+		break;
+
+	case "obj-de-may-no":
+		echo '<div class="obj-de-may-no" style="padding-left: 20px;color:yellow">';
+		echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-de-may-no-input" name="obj-de-may-no-input" value="' . $amplitude . '" class="range-value-input range-value-input-'. $device_hostid .'"/> (giây)';
 		echo '</div>';
-		
-		echo '<div class="radio">';
-		echo '<label for="dieu-hoa"><input id="dieu-hoa" name="ra_1" type="radio" ' . $selected_dieuhoa .' value="1" /> Dieu hoa</label>';
+
+		echo '<div class="slidecontainer">
+		<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider slider-change-range-max-min" id="deMayNo" deviceId="'.$deviceid.'" textViewId="obj-de-may-no-input">
+		</div>';
+
+	break;
+
+	case "obj-ra-say-may-no":
+		echo '<div class="obj-ra-say-may-no" style="padding-left: 20px;color:yellow">';
+		echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-ra-say-may-no-input" name="obj-ra-say-may-no-input" value="' . $amplitude . '" class="range-value-input range-value-input-'. $device_hostid .'"/> (giây)';
 		echo '</div>';
-		
-		echo '<div class="radio">';
-		echo '<label for="quat"><input id="quat" name="ra_1" type="radio" ' . $selected_quat .' value="2" /> Quat</label>';
+
+		echo '<div class="slidecontainer">
+		<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider slider-change-range-max-min" id="sayMayNo" deviceId="'.$deviceid.'" textViewId="obj-ra-say-may-no-input">
+		</div>';
+
+	break;
+
+	case "obj-ra-tat-may-no":
+		echo '<div class="obj-ra-tat-may-no" style="padding-left: 20px;color:yellow">';
+		echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-ra-tat-may-no-input" name="obj-ra-tat-may-no-input" value="' . $amplitude . '" class="range-value-input range-value-input-'. $device_hostid .'"/> (giây)';
 		echo '</div>';
-		
-		echo '</div>';
-		}
+
+		echo '<div class="slidecontainer">
+		<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider slider-change-range-max-min" id="tatMayNo" deviceId="'.$deviceid.'" textViewId="obj-ra-tat-may-no-input">
+		</div>';
+
+	break;
+
+	case "obj-................":
+
+
+	break;
+
+	case "obj-................":
+
+
+	break;
+
+	case "obj-................":
+
+
+	break;
+
 }
-
-break;
-
-case "obj-................":
-
-
-break;
-
-case "obj-................":
-
-
-break;
-
-case "obj-................":
-
-
-break;
-
-case "obj-................":
-
-
-break;
-
-		}
 					
 
 	        echo ' <div class="clearfix"></div>';
@@ -174,13 +202,13 @@ break;
 // Hien thi thong tin vao
 function PrintObjectVao($conn) {
 
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " where d.type = 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, d.on_text, d.off_text, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " where d.type = 'obj-vao'";
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
 	    // output data of each row
 	    while($row = $result->fetch_assoc()) {
-	        PrintVao($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn);
+	        PrintVao($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $row["on_text"], $row["off_text"], $conn);
 	    }
 	} else {
 	    echo "0 results";
@@ -188,10 +216,11 @@ function PrintObjectVao($conn) {
 }
 
 // Print object
-function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn) {
+function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $on_text, $off_text, $conn) {
 
 	$bg_cl = "background-color-off";
-	$stateView = "OFF";
+	$stateView =  $off_text; //"OFF";
+	// $stateView =  "OFF";
 	$stateViewLower = "off";
 	$stateValue = "0";
 	$stateName = "";
@@ -209,7 +238,8 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 	
 	if($state == 1) {
 		$bg_cl = "background-color-on";
-		$stateView = "ON";
+		$stateView = $on_text; //"ON";
+		// $stateView = "ON";
 		$stateViewLower = "on";
 		$stateValue = "1";
 	}
@@ -298,7 +328,7 @@ function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $
 // Hien thi thong tin vao
 function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $device_hostId) {
 	$deviceId = $objId;
-
+	$sms_groupId = 1; // Warning group
 	// Update device_host
 	$sql = "UPDATE device_host SET state=" . $statusValue . ", updatedate=SYSDATE() WHERE id=" . $device_hostId;
 	if ($conn->query($sql) === TRUE){
@@ -320,7 +350,7 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 			$sql = "INSERT INTO history(hostid,deviceid,value,startdate,createdate) VALUES($hostid,$objId, '$statusValue', SYSDATE(),SYSDATE())";
 			if ($conn->query($sql) === TRUE){
 				// SMS
-				$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .")";
+				$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type, sms_groupId) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .",". $sms_groupId .")";
 				if ($conn->query($sql) === TRUE){}
 			}
 				// echo "Record inserted successfully";
@@ -337,11 +367,12 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 		if ($result->num_rows > 0) {
 			 // output data of each row
 			 while($row = $result->fetch_assoc()) {
-				 $id = $row["id"];
+				$id = $row["id"];
 				$sql = "UPDATE history SET value='$statusValue', enddate=SYSDATE(), updatedate=SYSDATE() WHERE id=$id";
+
 				if ($conn->query($sql) === TRUE){
 					// SMS
-					$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .")";
+					$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type, sms_groupId) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .",". $sms_groupId .")";
 					if ($conn->query($sql) === TRUE){}
 				}
 					//echo "Record updated successfully";
@@ -409,7 +440,46 @@ function PrintLine($Id, $objName, $state, $startdate, $enddate) {
 			$enddate
 		</td>
 	</tr>";
-		
-	
+}
+
+
+// Print object: Export page
+function PrintLine_ExportPage($Id, $objName, $state, $startdate, $enddate, $hostid, $host_name, $note) {
+	$statuName = 'OFF';
+	if($state == "1"){
+		$statuName = 'ON';
+	}
+	// <td class='hidden'>
+	// $deviceid
+	// </td>
+	echo "<tr>
+		<td>
+			$Id
+		</td>
+		<td>
+			$hostid
+		</td>
+		<td>
+			$host_name
+		</td>
+		<td>
+			$objName
+		</td>
+		<td style='display:none;'>
+			$statuName
+		</td>
+		<td>
+			$startdate
+		</td>
+		<td>
+			$enddate
+		</td>
+		<td>
+			
+		</td>
+		<td>
+			$note
+		</td>
+	</tr>";
 }
 ?>
