@@ -1,6 +1,7 @@
 $(document).ready(function() {
 var notReload = false;
 var maxTime = 7; // Seconds
+var expandTime = 3; // expand Seconds
 var countTime = 0;
 var lastDownItem = null;
 
@@ -59,6 +60,11 @@ var bPopup;
 $(".obj-button-up-down-icon").bind("click",function(e) {
 	e.preventDefault();
 
+	if(notReload){
+		console.log("[WARNING] notReload = true");
+		return;
+	}
+
 	var getInput = $("input.range-value-input-" + $(this).attr("rangeInputId")).val();
 	if(getInput == ""){
 		alert("Yêu cầu nhập số giây hợp lệ");
@@ -105,12 +111,15 @@ $(".obj-button-up-down-icon").on("off",function(e) {
 	console.log("Mouse up");
 	var obj = $(this);
 	TurnOff(obj.closest(".object"));
-
+	console.log("Waiting for 2 seconds...");
 	setTimeout(function(){
 		obj.removeClass("obj-button-up-down-mousedowning");
 		$('.obj-button-up-down').removeClass("turn-on");
+		bPopup.close();
 		notReload = false;
-	}, 1000);
+		countTime = 0;
+		console.log("Mouse up finished");
+	}, 2000);
 	
 });
 
@@ -372,13 +381,6 @@ setInterval(function(){
 		if(countTime == maxTime){
 			// Update to 0
 			lastDownItem.trigger("off");
-
-			bPopup.close();
-		}
-
-		if(countTime >= maxTime + 2){
-			notReload = false;
-			countTime = 0;
 		}
 	} else {
 		countTime = 0;
