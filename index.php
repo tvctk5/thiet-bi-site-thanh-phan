@@ -84,7 +84,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
 <html lang="en"> 
   <head>
     <meta charset="utf-8">
-    <meta refreshpage="true" content="500">
+    <meta refreshpage="true" content="5">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <?php

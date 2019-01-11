@@ -3,7 +3,7 @@
 function PrintObjectDatabase($conn) {
 
 	// $sql = "SELECT *  FROM device where type <> 'obj-vao'";
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " where d.type <> 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.type <> 'obj-vao'";
 //die($sql);
 // return;
 	$result = $conn->query($sql);
@@ -202,7 +202,7 @@ switch($objType){
 // Hien thi thong tin vao
 function PrintObjectVao($conn) {
 
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, d.on_text, d.off_text, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " where d.type = 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, d.on_text, d.off_text, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.type = 'obj-vao'";
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
@@ -262,7 +262,7 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 // Hien thi thong tin vao
 function WriteHistoryObjectVao($conn, $hostid) {
 	
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d left join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " where d.type = 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " and dh.status=1 where d.type = 'obj-vao'";
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
