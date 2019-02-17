@@ -262,7 +262,7 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 // Hien thi thong tin vao
 function WriteHistoryObjectVao($conn, $hostid) {
 	
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " and dh.status=1 where d.type = 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " and dh.status=1 where d.typeId=0";
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
@@ -342,7 +342,7 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 	if($statusValue == '1'){
 		// echo 'statusValue = 1';
 
-		$sql = "SELECT * FROM history WHERE hostid=$hostid AND deviceid='". $objId . "' AND startdate is NOT NULL and enddate is NULL ORDER BY id LIMIT 1";
+		$sql = "SELECT * FROM history WHERE hostid=$hostid AND deviceid='". $objId . "' AND startdate is NOT NULL and enddate is NULL ORDER BY id DESC LIMIT 1";
 		$result = $conn->query($sql);
 		if ($result->num_rows <= 0) {
 			//echo '$result->num_rows <= 0';
@@ -362,7 +362,7 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 	else{
 		// echo 'statusValue = 0';
 		// = 0
-		$sql = "SELECT * FROM history WHERE hostid=$hostid AND deviceid='$objId' AND startdate is NOT NULL and enddate is NULL ORDER BY id LIMIT 1";
+		$sql = "SELECT * FROM history WHERE hostid=$hostid AND deviceid='$objId' AND startdate is NOT NULL and enddate is NULL ORDER BY id DESC LIMIT 1";
 		$result = $conn->query($sql);
 		if ($result->num_rows > 0) {
 			 // output data of each row
