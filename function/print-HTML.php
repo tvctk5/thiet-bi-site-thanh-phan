@@ -299,6 +299,8 @@ function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $
 	if($mute == null){
 		$mute = '0';
 	}
+
+	if($content[0] != "1" && $content[0] != "0") { return;}
 	
 	if($content[0] == "1") {
 		$bg_cl = "background-color-on";
