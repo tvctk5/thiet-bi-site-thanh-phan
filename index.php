@@ -207,7 +207,10 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
 
 <div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
 <hr/>
-<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12' style='padding:10px;text-align:right; margin: 5px; background-color: #c9d9e0;'><!--button id="export" data-export="export">Export (Top 20)</button--> (<a href='export.php' target='_blank'> >> Xem thêm</a>)</div>
+<div class='col-lg-12 col-md-12 col-sm-12 col-xs-12' style='padding:10px;text-align:right; margin: 5px; background-color: #c9d9e0;'><!--button id="export" data-export="export">Export (Top 20)</button--> 
+(<a href='export.php' target='_blank'> >> Xem thêm</a>)
+<!-- (>> Xem chi tiết xem thêm trên trang trung tâm quản lý các trạm) -->
+</div>
 <hr/>
 <table class='tbllistitem' id="export_table"> 
     <tr>
@@ -228,6 +231,15 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
         </th>
         <th>
             T/g Kết thúc
+        </th>
+        <th>
+            <div>Thời gian</div><div class="th-note">(Giờ)</div>
+        </th>
+        <th>
+            Định mức
+        </th>
+        <th>
+            Kết quả
         </th>
     </tr>
 <?php

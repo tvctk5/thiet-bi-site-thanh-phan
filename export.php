@@ -86,7 +86,9 @@ $start = ($current_page - 1) * $limit;
 
 // BƯỚC 5: TRUY VẤN LẤY DANH SÁCH TIN TỨC
 // Có limit và start rồi thì truy vấn CSDL lấy danh sách tin tức
-$result = mysqli_query($conn, "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid, h.hostid as hostid, ho.name as host_name, '' as note FROM history h join host ho on ho.id=h.hostid left join device d on h.deviceid = d.id  WHERE 1=1 " . $date_condition . "ORDER BY h.id DESC, h.startdate DESC LIMIT $start, $limit");
+$result = mysqli_query($conn, "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid, h.hostid as hostid, ho.name as host_name, '' as note, h.hours, h.minutes, h.seconds, h.month_of_log, h.quota, h.operator, h.result
+    FROM history h join host ho on ho.id=h.hostid left join device d on h.deviceid = d.id
+    WHERE 1=1 " . $date_condition . "ORDER BY h.id DESC, h.startdate DESC LIMIT $start, $limit");
 
 ?>
 
@@ -178,16 +180,19 @@ echo '<input type="text" id="end_date_search" name="end_date_search" placeholder
             T/g Kết thúc
         </th>
         <th>
-            Thời gian
+            <div>Thời gian</div><div class="th-note">(Giờ)</div>
         </th>
         <th>
-            Ghi chú
+            Định mức
+        </th>
+        <th>
+            Kết quả
         </th>
     </tr>
 <?php
 // BƯỚC 6: HIỂN THỊ DANH SÁCH TIN TỨC
 while ($row = mysqli_fetch_assoc($result)){
-    PrintLine_ExportPage($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"], $row["hostid"], $row["host_name"], $row["note"]);
+    PrintLine_ExportPage($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"], $row["hostid"], $row["host_name"], $row["note"], $row);
 }
 ?>
 <tr>

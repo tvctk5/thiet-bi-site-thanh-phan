@@ -258,17 +258,32 @@ function PrintVao($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon
 	
 }
 
+function getQuota($dataQuotaHost, $hostId, $deviceId, $month){
+	foreach ($dataQuotaHost as $row){
+		if($row["hostId"] == $hostId && $row["deviceId"] == $deviceId && strpos($row["months"], ',' . $month . ',') !== false){
+			return $row;
+		}
+	}
+}
+
 
 // Hien thi thong tin vao
 function WriteHistoryObjectVao($conn, $hostid) {
-	
+	// quota for host
+	$dataQuotaHost[] = null;
+	$sqlquotahost = "SELECT d.*, c.months FROM device_host_quota d join calendar c on d.calendarId=c.id  WHERE d.hostId=" . $hostid;
+	$qquotahost = mysqli_query($conn, $sqlquotahost) or die("error to fetch tot hosts data; Query: " .$sqlquotahost . '; Error:'. $conn->error);
+	while( $row = mysqli_fetch_assoc($qquotahost) ) { 
+		$dataQuotaHost[] = $row;
+	}
+
 	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " and dh.status=1 where d.typeId=0";
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
 		// output data of each row
 		while($row = $result->fetch_assoc()) {
-			WriteHistory($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn);
+			WriteHistory($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn, $dataQuotaHost);
 		}
 	} else {
 		echo "0 results";
@@ -277,7 +292,7 @@ function WriteHistoryObjectVao($conn, $hostid) {
 
 
 // Print object
-function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn) {
+function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn, $dataQuotaHost) {
 	
 	$bg_cl = "background-color-off";
 	$stateView = "OFF";
@@ -324,11 +339,11 @@ function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $
 	}
 
 	// Check history
-	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid, $device_hostid);
+	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid, $device_hostid, $dataQuotaHost);
 }
 
 // Hien thi thong tin vao
-function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $device_hostId) {
+function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $device_hostId, $dataQuotaHost) {
 	$deviceId = $objId;
 	$sms_groupId = 1; // Warning group
 	// Update device_host
@@ -349,7 +364,7 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 		if ($result->num_rows <= 0) {
 			//echo '$result->num_rows <= 0';
 			// Create new
-			$sql = "INSERT INTO history(hostid,deviceid,value,startdate,createdate) VALUES($hostid,$objId, '$statusValue', SYSDATE(),SYSDATE())";
+			$sql = "INSERT INTO history(hostid,deviceid,device_hostid,value,startdate,createdate,month_of_log) VALUES($hostid, $objId, $device_hostId, '$statusValue', SYSDATE(),SYSDATE(),MONTH(SYSDATE()))";
 			if ($conn->query($sql) === TRUE){
 				// SMS
 				$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type, sms_groupId) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .",". $sms_groupId .")";
@@ -364,13 +379,39 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 	else{
 		// echo 'statusValue = 0';
 		// = 0
-		$sql = "SELECT * FROM history WHERE hostid=$hostid AND deviceid='$objId' AND startdate is NOT NULL and enddate is NULL ORDER BY id DESC LIMIT 1";
-		$result = $conn->query($sql);
+		$sql = "SELECT *, TIME_TO_SEC(TIMEDIFF(SYSDATE(), startdate))/3600 as hours_u, TIME_TO_SEC(TIMEDIFF(SYSDATE(), startdate))/60 as minutes_u, TIME_TO_SEC(TIMEDIFF(SYSDATE(), startdate)) as seconds_u 
+				FROM history WHERE hostid=$hostid AND deviceid='$objId' AND startdate is NOT NULL and enddate is NULL ORDER BY id DESC LIMIT 1";
+		// echo "SQL: " . $sql;
+		$result = $conn->query($sql) or die("SQL: " . $sql . "; Error: " . $conn->error);
 		if ($result->num_rows > 0) {
 			 // output data of each row
 			 while($row = $result->fetch_assoc()) {
 				$id = $row["id"];
-				$sql = "UPDATE history SET value='$statusValue', enddate=SYSDATE(), updatedate=SYSDATE() WHERE id=$id";
+				$month_of_log = $row["month_of_log"];
+				$deviceid = $row["deviceid"];
+				$hours_u = $row["hours_u"];
+				$minutes_u = $row["minutes_u"];
+				$seconds_u = $row["seconds_u"];
+
+				// Định mức
+				$quotaItem = getQuota($dataQuotaHost, $hostid, $deviceid, $month_of_log);
+				$quota = $quotaItem["quota"];
+				$operator = $quotaItem["operator"];
+
+				$time = '';
+				$result = '';
+				
+				$time = $hours_u;
+
+				if($operator == "*"){
+					$result = $time * $quota;
+				} else {
+					$result = $quota - $time;
+				}
+
+				$sql = "UPDATE history SET value='$statusValue', enddate=SYSDATE(), updatedate=SYSDATE(),  
+					hours=$hours_u, minutes=$minutes_u, seconds=$seconds_u, quota=$quota, operator='$operator', result=$result
+					WHERE id=$id";
 
 				if ($conn->query($sql) === TRUE){
 					// SMS
@@ -399,9 +440,11 @@ function PrintList($conn, $count) {
 
 	if($count == 0){
 		// Get all
-		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid FROM history h join device d on h.deviceid = d.id where h.hostid=" . $_SESSION['hostid'] . " ORDER BY h.id DESC, h.startdate DESC";
+		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid, h.hours, h.minutes, h.seconds, h.month_of_log, h.quota, h.operator, h.result 
+		FROM history h join device d on h.deviceid = d.id where h.hostid=" . $_SESSION['hostid'] . " ORDER BY h.id DESC, h.startdate DESC";
 	}else{
-		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid FROM history h join device d on h.deviceid = d.id where h.hostid=" . $_SESSION['hostid'] . " ORDER BY h.id DESC, h.startdate DESC LIMIT " . $count;
+		$sql = "SELECT h.id, h.startdate, h.enddate, h.value, h.value as state, d.name, d.id as deviceid, d.objid, h.hours, h.minutes, h.seconds, h.month_of_log, h.quota, h.operator, h.result 
+		FROM history h join device d on h.deviceid = d.id where h.hostid=" . $_SESSION['hostid'] . " ORDER BY h.id DESC, h.startdate DESC LIMIT " . $count;
 	}
 
 	$result = $conn->query($sql);
@@ -409,7 +452,7 @@ function PrintList($conn, $count) {
 	if ($result->num_rows > 0) {
 	    // output data of each row
 	    while($row = $result->fetch_assoc()) {
-	        PrintLine($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"]);
+	        PrintLine($row["id"], $row["name"], $row["state"], $row["startdate"], $row["enddate"], $row);
 	    }
 	} else {
 	    echo "0 row";
@@ -417,11 +460,15 @@ function PrintList($conn, $count) {
 }
 
 // Print object
-function PrintLine($Id, $objName, $state, $startdate, $enddate) {
+function PrintLine($Id, $objName, $state, $startdate, $enddate, $row) {
 	$statuName = 'OFF';
 	if($state == "1"){
 		$statuName = 'ON';
 	}
+	$time = $row["hours"];
+	$quota = $row["quota"];
+	$result = $row["result"];
+	
 	// <td class='hidden'>
 	// $deviceid
 	// </td>
@@ -441,16 +488,30 @@ function PrintLine($Id, $objName, $state, $startdate, $enddate) {
 		<td>
 			$enddate
 		</td>
+		<td class='td-text-right'>
+			$time
+		</td>
+		<td class='td-text-right'>
+			$quota
+		</td>
+		<td class='td-text-right'>
+			$result
+		</td>
 	</tr>";
 }
 
 
 // Print object: Export page
-function PrintLine_ExportPage($Id, $objName, $state, $startdate, $enddate, $hostid, $host_name, $note) {
+function PrintLine_ExportPage($Id, $objName, $state, $startdate, $enddate, $hostid, $host_name, $note, $row) {
 	$statuName = 'OFF';
 	if($state == "1"){
 		$statuName = 'ON';
 	}
+	
+	$time = $row["hours"];
+	$quota = $row["quota"];
+	$result = $row["result"];
+	
 	// <td class='hidden'>
 	// $deviceid
 	// </td>
@@ -467,20 +528,20 @@ function PrintLine_ExportPage($Id, $objName, $state, $startdate, $enddate, $host
 		<td>
 			$objName
 		</td>
-		<td style='display:none;'>
-			$statuName
-		</td>
 		<td>
 			$startdate
 		</td>
 		<td>
 			$enddate
 		</td>
-		<td>
-			
+		<td class='td-text-right'>
+			$time
 		</td>
-		<td>
-			$note
+		<td class='td-text-right'>
+			$quota
+		</td>
+		<td class='td-text-right'>
+			$result
 		</td>
 	</tr>";
 }
