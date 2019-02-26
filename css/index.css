@@ -563,6 +563,7 @@ body{
   text-transform: uppercase;
   background-color:#c0c9e2;
   padding: 3px;
+  margin-bottom: 5px;
 }
 .host-name{
   font-size: 80% !important;
@@ -573,4 +574,14 @@ body{
 }
 .td-text-right{
   text-align: right;
+}
+.div-do-row > div {
+  border: solid 1px #aba6a68c;
+}
+
+.div-do-group > div:nth-child(even) {
+  background: #CCC;
+}
+.div-do-group > div:nth-child(odd) {
+  background: #ffb0b0;
 }

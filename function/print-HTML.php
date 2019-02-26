@@ -3,7 +3,7 @@
 function PrintObjectDatabase($conn) {
 
 	// $sql = "SELECT *  FROM device where type <> 'obj-vao'";
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.type <> 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.typeId = 1";
 //die($sql);
 // return;
 	$result = $conn->query($sql);
@@ -199,10 +199,108 @@ switch($objType){
 	
 }
 
+// Hien thi thong tin thiết bị đo
+function PrintObjectDo($conn) {
+
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, d.on_text, d.off_text, d.unit, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.typeId=2 ORDER BY d.id";
+	$result = $conn->query($sql);
+
+	if ($result->num_rows > 0) {
+		// // output data of each row
+		// $lastRow;
+		// $arrayGroup = array(4,2,3);
+		// $arrIndex = 0;
+		// $itemIndex = 1;
+
+	    // while($row = $result->fetch_assoc()) {
+		// 	if($itemIndex == 1){
+		// 		echo '<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">';
+		// 	}
+		// 	if(!isset($lastRow)){
+		// 		$lastRow = $row;
+		// 	}
+		// 	PrintDo($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $row["on_text"], $row["off_text"], $conn);
+			
+		// 	if($itemIndex == $arrayGroup[$arrIndex]){
+		// 		echo '</div>';
+		// 		$itemIndex = 1;
+		// 		$arrIndex = $arrIndex + 1;
+		// 	}
+		// }
+		$data = [];
+		while($row = $result->fetch_assoc()) {
+			$data[] = $row;
+		}
+
+		$index = 0;
+		// Group 1
+		echo '<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 div-do-group">';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index]["value"] . $data[$index]["unit"] . ' - ' . $data[$index + 1]["value"] . $data[$index + 1]["unit"] . '</div>';
+		echo '    </div>';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 2]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 2]["value"] . $data[$index + 2]["unit"] . ' - ' . $data[$index + 3]["value"] . $data[$index + 3]["unit"] . '</div>';
+		echo '    </div>';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 4]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 4]["value"] . $data[$index + 4]["unit"] . ' - ' . $data[$index + 5]["value"] . $data[$index + 5]["unit"] . '</div>';
+		echo '    </div>';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 6]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 6]["value"] . $data[$index + 6]["unit"] . ' - ' . $data[$index + 7]["value"] . $data[$index + 7]["unit"] . '</div>';
+		echo '    </div>';
+		echo '</div>';
+
+		
+		// Group 2
+		echo '<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 div-do-group">';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 8]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 8]["value"] . $data[$index + 8]["unit"] . '</div>';
+		echo '    </div>';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 9]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 9]["value"] . $data[$index + 9]["unit"] . '</div>';
+		echo '    </div>';
+		echo '</div>';
+
+		// Group 3
+		echo '<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 div-do-group">';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 10]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 10]["value"] . $data[$index + 10]["unit"] . '</div>';
+		echo '    </div>';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 11]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 11]["value"] . $data[$index + 11]["unit"] . '</div>';
+		echo '    </div>';
+		echo '    <div class="col-sm-12 col-xs-12 div-do-row">';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 12]["name"] . '</div>';
+		echo '    	<div class="col-sm-6 col-xs-6">'. $data[$index + 12]["value"] . $data[$index + 12]["unit"] . '</div>';
+		echo '    </div>';
+		echo '</div>';
+
+	} else {
+	    echo "0 results";
+	}
+}
+
+// Print object
+function PrintDo($name, $value0, $value1, $unit0, $unit1) {
+	echo '<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">';
+		echo '<div class="object '.$objType . ' ' . $objType . "-" . $stateViewLower . " " .$objFalvor. " " .$stateName.'" id="'. $objId .'" mute="' . $mute . '">';
+
+		echo '</div>';
+	echo '</div>';
+	
+}
+
 // Hien thi thong tin vao
 function PrintObjectVao($conn) {
 
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, d.on_text, d.off_text, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.type = 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, d.on_text, d.off_text, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.typeId = 0";
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
@@ -277,19 +375,50 @@ function WriteHistoryObjectVao($conn, $hostid) {
 		$dataQuotaHost[] = $row;
 	}
 
-	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " and dh.status=1 where d.typeId=0";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, d.typeId as typeId, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $hostid . " and dh.status=1 where d.typeId=0 OR d.typeId=2";
+	
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
 		// output data of each row
 		while($row = $result->fetch_assoc()) {
-			WriteHistory($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn, $dataQuotaHost);
+			// Thiết bị Vào
+			if($row["typeId"] == 0){
+				WriteHistory($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn, $dataQuotaHost);
+				continue;
+			}
+			// Kết quả đo
+			if($row["typeId"] == 2){
+				UpdateStateKqDo($conn, $row["objid"], $row["device_hostid"]);
+				continue;
+			}	
 		}
 	} else {
 		echo "0 results";
 	}
 }
 
+
+// Print object
+function UpdateStateKqDo($conn, $objId, $device_hostid) {
+	$value = "0";
+
+	$link = 'files/do/' . $objId .'.txt';
+
+	$content = file_get_contents($link);
+
+	if($content[0] == "") { return;}
+
+	$value = $content;
+	
+	// Update device_host
+	$sql = "UPDATE device_host SET value='" . $value . "', updatedate=SYSDATE() WHERE id=$device_hostid";
+	if ($conn->query($sql) === TRUE){
+		echo "<div>device_host[typeId=2]: Record updated successfully" . PHP_EOL .'</div>';
+	}
+	else
+	    echo "<div>device_host[typeId=2]: Error updating record: SQL: " . $sql . "; ERROR: " . $conn->error . PHP_EOL . '</div>';
+}
 
 // Print object
 function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn, $dataQuotaHost) {
@@ -349,10 +478,10 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 	// Update device_host
 	$sql = "UPDATE device_host SET state=" . $statusValue . ", updatedate=SYSDATE() WHERE id=" . $device_hostId;
 	if ($conn->query($sql) === TRUE){
-		echo "device_host: Record updated successfully" . PHP_EOL ;
+		echo "device_host[typeId=0]: Record updated successfully" . PHP_EOL ;
 	}
 	else
-	    echo "device_host: Error updating record: " . $conn->error . PHP_EOL;
+	    echo "device_host[typeId=0]: Error updating record: " . $conn->error . PHP_EOL;
 
 	// Create history
 	// Start ON

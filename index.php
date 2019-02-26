@@ -174,17 +174,24 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
 ?>   
 <!--========================================================-->
 
-	 <div class="row">
-     <div class="row device-group">
-     <b>Thiết bị vào</b>
-     </div>
-     <?php
+<div class="row">
+    <div class="row device-group">
+    <b>Thiết bị vào</b>
+    </div>
+    <?php
 
        PrintObjectVao($conn);
-
     ?>
-     </div>
+</div>
 
+<div class="row">
+    <div class="row device-group">
+        <b>Kết quả đo</b>
+    </div>
+    <?php
+        PrintObjectDo($conn);
+    ?>
+</div>
 
 	 <div class="row">
      <?php
