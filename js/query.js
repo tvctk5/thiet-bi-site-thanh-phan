@@ -318,6 +318,28 @@ $(".class-ra_1 input").on("click", function(){
 	});
 });
 
+
+$(".class-nhan_cong_tu_dong input").on("click", function(){
+	var OBJECT = $(this);
+	var value = OBJECT.val();
+	var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
+
+	// var status = $(OBJECT).find("input[name='state']").val();
+	$.post(
+		"function/data.php",
+		{
+			type : "typeId_3_nhan_cong_tu_dong",
+			value : value,
+			objid : "nhan_cong_tu_dong",
+			device_hostid : device_hostid
+		}	
+	).fail(function(){
+		console.log(".class-nhan_cong_tu_dong input set to fail");
+	}).always(function(){
+		console.log(".class-nhan_cong_tu_dong input set to ok");
+	});
+});
+
 // function alert
 function AlertBox(message) {
 	$(".log-box").addClass("log-show");

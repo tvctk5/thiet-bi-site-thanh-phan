@@ -84,7 +84,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['hostid'])) {
 <html lang="en"> 
   <head>
     <meta charset="utf-8">
-    <meta refreshpage="true" content="5">
+    <meta refreshpage="true" content="500">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <?php
@@ -193,23 +193,36 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
     ?>
 </div>
 
-	 <div class="row">
-     <?php
+<?php
         if($_SESSION['permission_control'] == 1){
+            echo '<div class="row">';
             echo '<div class="row device-group"><b>Thiết bị ra</b></div>';
         }
-    ?>
-     
-    <div class="land-1">
-
+?>
 
 <?php
     if($_SESSION['permission_control'] == 1){
-
-
-       PrintObjectDatabase($conn);
+        echo '<div class="land-1">';
+        PrintObjectDatabase($conn);
+        echo '</div>';
+        echo '</div>';
     }
+?>
 
+<?php
+        if($_SESSION['permission_control'] == 1){
+            echo '<div class="row">';
+            echo '<div class="row device-group"><b>Điều khiển khác</b></div>';
+        }
+?>
+
+<?php
+    if($_SESSION['permission_control'] == 1){
+        echo '<div class="land-1">';
+        PrintObjectDatabaseByTypeId($conn, 3);
+        echo '</div>';
+        echo '</div>';
+    }
 ?>
 
 <div class='col-lg-12 col-md-12 col-sm-12 col-xs-12'>

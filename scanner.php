@@ -11,6 +11,8 @@
 
     // Write log
     WriteHistoryObjectVao($conn, $hostid);
+
+    WriteFileKqDoDinhMuc($conn, $hostid);
 ?> 
 
 <?php 

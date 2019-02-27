@@ -1,4 +1,8 @@
-<?php 
+<?php
+
+function WriteHtmlLog($log){
+	echo "<div>" . $log . "</div>";
+}
 
 function PrintObjectDatabase($conn) {
 
@@ -478,10 +482,10 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 	// Update device_host
 	$sql = "UPDATE device_host SET state=" . $statusValue . ", updatedate=SYSDATE() WHERE id=" . $device_hostId;
 	if ($conn->query($sql) === TRUE){
-		echo "device_host[typeId=0]: Record updated successfully" . PHP_EOL ;
+		WriteHtmlLog("device_host[typeId=0]: Record updated successfully" . PHP_EOL);
 	}
 	else
-	    echo "device_host[typeId=0]: Error updating record: " . $conn->error . PHP_EOL;
+		WriteHtmlLog("device_host[typeId=0]: Error updating record: " . $conn->error . PHP_EOL);
 
 	// Create history
 	// Start ON
@@ -673,5 +677,248 @@ function PrintLine_ExportPage($Id, $objName, $state, $startdate, $enddate, $host
 			$result
 		</td>
 	</tr>";
+}
+
+
+// Hien thi thong tin vao
+function WriteFileKqDoDinhMuc($conn, $hostid) {
+	// quota for host
+	$dataQuotaHost = [];
+	$rootPath = 'files/do';
+	$prefix = '_quota.txt';
+
+	// Kết quả đo
+	$sqlquotahost = "SELECT dhq.*, d.objid, d.typeId FROM device_host_quota dhq join device d on d.id=dhq.deviceId AND d.typeId=2  WHERE dhq.hostId=" . $hostid . " AND dhq.edited=1";
+	$qquotahost = mysqli_query($conn, $sqlquotahost) or die("error to fetch tot hosts data; Query: " .$sqlquotahost . '; Error:'. $conn->error);
+	while( $row = mysqli_fetch_assoc($qquotahost) ) { 
+		$dataQuotaHost[] = $row;
+	}
+
+	foreach ($dataQuotaHost as $row){
+		CreateFile($row["objid"] . $prefix, $rootPath, $row["quota"]);
+
+		$sql = 'UPDATE device_host_quota SET edited=0
+				WHERE id='. $row["id"];
+
+		if ($conn->query($sql) === TRUE){
+			WriteHtmlLog("[CreateFile -  TypeId=2]Record updated successfully");
+		}
+		else
+			WriteHtmlLog("[CreateFile -  TypeId=2] Error updating record: " . $conn->error);
+	}
+}
+
+function CreateFile($name, $path, $content){
+	$fullPath = $path . '/' . $name;
+	
+	if (!file_exists($path)) {
+		if(mkdir($path, 0777, true)){
+		}
+	}
+
+	$myfile = fopen($fullPath, "w") or die("Unable to open file!");
+	$txt = $content. "";
+	fwrite($myfile, $txt);
+	fclose($myfile);
+}
+
+
+function PrintObjectDatabaseByTypeId($conn, $typeId) {
+	// $sql = "SELECT *  FROM device where type <> 'obj-vao'";
+	$sql = "SELECT d.id as deviceid, d.name as name,d.flavor as flavor,d.icon as icon,d.objid as objid, d.type as type, dh.* ,dh.id as device_hostid  FROM device d join device_host dh on d.id = dh.deviceId and dh.hostId=" . $_SESSION['hostid'] . " and dh.status=1 where d.typeId = " . $typeId;
+	//die($sql);
+	// return;
+	// WriteHtmlLog($sql);
+	$result = $conn->query($sql) or die("EXEC error! Query: " . $sql . "; error: ". $conn->error);
+
+	if ($result->num_rows > 0) {
+	    // output data of each row
+	    while($row = $result->fetch_assoc()) {
+	        PrintObjectByTypeId($row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"]);
+	    }
+	} else {
+	    echo "0 results";
+	}
+}
+
+// Print object
+function PrintObjectByTypeId($objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid) {
+	$stateName = "";
+	$stateButton = "";
+	// echo "----------:". $state;
+	if($state) {
+		$stateButton = "switch-on";
+		$stateName = "turn-on";
+	}
+	$buttonUpDown = "";
+	if($objType == "obj-de-may-no" || $objType == "obj-ra-say-may-no" || $objType == "obj-ra-tat-may-no"){
+		$buttonUpDown = 'obj-button-up-down-icon';
+		$objFalvor = '';
+		$stateName = "";
+	}
+
+	echo '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-6 parent-item" data-device_hostid="' . $device_hostid . '" data-deviceid="' . $deviceid . '" data-hostid="' . $hostid . '" data-type="' . $objType . '" data-objid="' . $objId . '">';
+		echo '<div class="object '.$objType . " " .$objFalvor. " " .$stateName.'" id="'. $objId .'">';
+			echo '<div class="obj-info">',
+	                '<p class="obj-header">'.$objName.'</p>';
+
+	            if( $objType != "obj-button") {
+					echo'<p class="obj-counter-percent">', 
+							//'<i class="fa '.$icon.'"></i>',
+							//'<b class="counter">'.$amplitude.'</b>',
+						'</p>';
+					echo  '</div>';
+				}
+			
+			if($objType == "obj-radiobutton"){
+				echo '<div class="obj-timer ignore-onclick">';
+				echo '<div class="switch-button '.$stateButton.'"></div>';
+				echo '</div>';
+			} else {
+				echo '<div class="obj-timer '. $buttonUpDown .'" id="up-down-button-'. $device_hostid .'" rangeInputId="'. $device_hostid .'">
+						<svg class="timer-progress" viewbox="0 0 82 82">
+							<circle class="progress-bg" r="39" cx="41" cy="41" stroke-dasharray="245"></circle>
+							<circle class="progress-bar" r="39" cx="41" cy="41" stroke-dasharray="245"></circle>
+						</svg>',
+						'<i class="obj-icon fa '.$icon.'"></i>',
+						'</div>';
+			}
+	        if($objType == "obj-ra")
+	    		echo '<div class="switch-button '.$stateButton.'"></div>';
+	        
+		else if( $objType == "obj-button")
+	        	echo '<div class="switch-button '.$stateButton.'" id-sub="'. $objId .'"></div>';
+	        else if( $objType == "obj-turn obj-slider" ) {
+	        	echo '<div class="switch-button type-turn"></div>
+	        			//<div class="obj-off"><i class="fa fa-close"></i></div>
+	        			//<div class="slider-range-min"></div>';
+
+			}
+			
+		// if($objType == "obj-de-may-no"){
+		// 	echo '<div class="obj-de-may-no" style="padding-left: 20px;color:yellow">';
+		// 	echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-de-may-no-input" name="obj-de-may-no-input" value="' . $amplitude . '"/> (giây)';
+		// 	echo '</div>';
+
+		// 	echo '<div class="slidecontainer">
+		// 	<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider" id="deMayNo" deviceId="'.$deviceid.'">
+		// 	</div>';
+		// }
+
+
+switch($objType){
+	case "obj-radiobutton": 
+		if($objId == "nhan_cong_tu_dong"){
+			$selected_0 = "";
+			$selected_1 = "";
+
+			if($value == "0") {
+				$selected_0 = "checked";
+			}else{
+				$selected_1 = "checked";
+			}
+
+			echo '<div class="class-nhan_cong_tu_dong">';
+
+			echo '<div class="radio">';
+			echo '<label for="nhan_cong_tu_dong_0"><input id="nhan_cong_tu_dong_0" name="nhan_cong_tu_dong" type="radio"' . $selected_0 .' value="0" class="" />Nhân công</label>';
+			echo '</div>';
+
+			echo '<div class="radio">';
+			echo '<label for="nhan_cong_tu_dong_1"><input id="nhan_cong_tu_dong_1" name="nhan_cong_tu_dong" type="radio" ' . $selected_1 .' value="1" />Tự động</label>';
+			echo '</div>';
+
+			echo '</div>';
+		} else{
+			if($objId == "ra_1"){
+				$selected_tudong = "";
+				$selected_dieuhoa = "";
+				$selected_quat = "";
+				
+				if($value == "0") {
+					$selected_tudong = "checked";
+				}else{
+					if($value == "1") {
+						$selected_dieuhoa = "checked";
+					} else{
+						$selected_quat = "checked";
+					}
+				}
+				
+				echo '<div class="class-ra-objradiobutton class-ra_1">';
+				
+				echo '<div class="radio">';
+				echo '<label for="tu-dong"><input id="tu-dong" name="ra_1" type="radio"' . $selected_tudong .' value="0" class="" /> Tự động</label>';
+				echo '</div>';
+				
+				echo '<div class="radio">';
+				echo '<label for="dieu-hoa"><input id="dieu-hoa" name="ra_1" type="radio" ' . $selected_dieuhoa .' value="1" /> Điều hòa</label>';
+				echo '</div>';
+				
+				echo '<div class="radio">';
+				echo '<label for="quat"><input id="quat" name="ra_1" type="radio" ' . $selected_quat .' value="2" /> Quạt</label>';
+				echo '</div>';
+				
+				echo '</div>';
+				}
+		}
+
+		break;
+
+	case "obj-de-may-no":
+		echo '<div class="obj-de-may-no" style="padding-left: 20px;color:yellow">';
+		echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-de-may-no-input" name="obj-de-may-no-input" value="' . $amplitude . '" class="range-value-input range-value-input-'. $device_hostid .'"/> (giây)';
+		echo '</div>';
+
+		echo '<div class="slidecontainer">
+		<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider slider-change-range-max-min" id="deMayNo" deviceId="'.$deviceid.'" textViewId="obj-de-may-no-input">
+		</div>';
+
+	break;
+
+	case "obj-ra-say-may-no":
+		echo '<div class="obj-ra-say-may-no" style="padding-left: 20px;color:yellow">';
+		echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-ra-say-may-no-input" name="obj-ra-say-may-no-input" value="' . $amplitude . '" class="range-value-input range-value-input-'. $device_hostid .'"/> (giây)';
+		echo '</div>';
+
+		echo '<div class="slidecontainer">
+		<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider slider-change-range-max-min" id="sayMayNo" deviceId="'.$deviceid.'" textViewId="obj-ra-say-may-no-input">
+		</div>';
+
+	break;
+
+	case "obj-ra-tat-may-no":
+		echo '<div class="obj-ra-tat-may-no" style="padding-left: 20px;color:yellow">';
+		echo 'Thời gian: <input style="width: 50px;color:red !important" type="text" id="obj-ra-tat-may-no-input" name="obj-ra-tat-may-no-input" value="' . $amplitude . '" class="range-value-input range-value-input-'. $device_hostid .'"/> (giây)';
+		echo '</div>';
+
+		echo '<div class="slidecontainer">
+		<input type="range" min="3" max="15" value="' . $amplitude . '" class="slider slider-change-range-max-min" id="tatMayNo" deviceId="'.$deviceid.'" textViewId="obj-ra-tat-may-no-input">
+		</div>';
+
+	break;
+
+	case "obj-................":
+
+
+	break;
+
+	case "obj-................":
+
+
+	break;
+
+	case "obj-................":
+
+
+	break;
+
+}
+					
+
+	        echo ' <div class="clearfix"></div>';
+		echo '</div>';
+	echo '</div>';
+	
 }
 ?>

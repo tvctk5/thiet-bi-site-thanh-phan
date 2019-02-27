@@ -457,11 +457,11 @@ body {
 }
 
 /*-----------------------------------------*/
-.class-ra_cau_dao, .class-ra-objradiobutton{
+.class-ra_cau_dao, .class-nhan_cong_tu_dong, .class-ra-objradiobutton{
   /* padding: 5px; */
   padding-left:3%;color: greenyellow;background-color: #138888;
 }
-.class-ra_cau_dao .radio, .class-ra-objradiobutton .radio{
+.class-ra_cau_dao .radio, .class-nhan_cong_tu_dong .radio, .class-ra-objradiobutton .radio{
   padding: 1px;
 }
 .obj-button-up-down .progress-bar:hover{
