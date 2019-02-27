@@ -360,7 +360,6 @@ $(".fa-volume").on("click", function(){
 
 let timeOutEvent;
 $(window).on('wheel', function(e) {
-	console.log("scroll event");
 	notReload = true;
 	clearTimeout(timeOutEvent);
 	timeOutEvent = setTimeout(function(){ notReload = false; }, 3000);
@@ -372,8 +371,6 @@ if(objMetaRefresh != null && objMetaRefresh != undefined){
 	var time_refresh = parseInt(objMetaRefresh.attr('content'));
 	
 	setInterval(function(){
-		
-		console.log("notReload:", notReload);
 		if(!notReload){
 			$(".obj-button-up-down-icon").unbind("click");
 			location.reload();
@@ -386,13 +383,11 @@ setInterval(function(){
 	// console.log("notReload: " + notReload);
 	// console.log("countTime: " + countTime);
 
-	if(notReload){
+	if(notReload && (lastDownItem != null && typeof lastDownItem != 'undefined')){
 		countTime ++;
 		if(countTime == maxTime){
 			// Update to 0
-			if(typeof lastDownItem != 'undefined'){
-				lastDownItem.trigger("off");
-			}
+			lastDownItem.trigger("off");
 		}
 	} else {
 		countTime = 0;
