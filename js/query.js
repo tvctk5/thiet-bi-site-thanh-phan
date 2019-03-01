@@ -322,7 +322,7 @@ $(".class-ra_1 input").on("click", function(){
 $(".class-nhan_cong_tu_dong input").on("click", function(){
 	var OBJECT = $(this);
 	var value = OBJECT.val();
-	var device_hostid = $(this).parents(".parent-item").first().data("device_hostid");
+	var device_hostid = $(this).parents(".class-nhan_cong_tu_dong").first().data("device_hostid");
 
 	// var status = $(OBJECT).find("input[name='state']").val();
 	$.post(

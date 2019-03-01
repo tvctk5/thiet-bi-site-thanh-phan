@@ -119,7 +119,7 @@ function DeleteObject($conn, $objName) {
 }
 
 // Update object
-function UpdateObject($conn, $objName, $propChange, $device_hostid, $objtype, $value, $hostId, $deviceId) {
+function UpdateObject($conn, $objName, $propChange, $device_hostid) {
 	$sql = "UPDATE " . TABLE . " SET $propChange WHERE id=$device_hostid ";
 
 	echo $sql . PHP_EOL;

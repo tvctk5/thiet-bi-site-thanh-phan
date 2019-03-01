@@ -203,22 +203,10 @@ echo "<input type='hidden' name='permission_control' id='permission_control' val
 <?php
     if($_SESSION['permission_control'] == 1){
         echo '<div class="land-1">';
-        PrintObjectDatabase($conn);
+        PrintObjectDatabaseByTypeId($conn, 1);
         echo '</div>';
-        echo '</div>';
-    }
-?>
 
-<?php
-        if($_SESSION['permission_control'] == 1){
-            echo '<div class="row">';
-            echo '<div class="row device-group"><b>Điều khiển khác</b></div>';
-        }
-?>
-
-<?php
-    if($_SESSION['permission_control'] == 1){
-        echo '<div class="land-1">';
+        echo '<div class="typeid-group-3">';
         PrintObjectDatabaseByTypeId($conn, 3);
         echo '</div>';
         echo '</div>';
