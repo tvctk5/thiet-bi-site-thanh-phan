@@ -1,1 +1,1 @@
-files,upgrade.php
+files,upgrade.php,sql-function.php

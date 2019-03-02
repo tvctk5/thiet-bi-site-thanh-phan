@@ -18,12 +18,6 @@
     }
 
     function DeleteFolder($dir){
-        // $files = array_diff(scandir($dir), array('.','..')); 
-        //  foreach ($files as $file) { 
-        //    (is_dir("$dir/$file")) ? DeleteFolder("$dir/$file") : unlink("$dir/$file"); 
-        //  } 
-        //  return rmdir($dir); 
-
         $src = opendir($dir);
         while(false !== ( $file = readdir($src)) ) {
             if (( $file == '.' ) || ( $file == '..' )) {
@@ -207,4 +201,6 @@
     $result = mysqli_query($conn, $sql) or die("error to update host version; SQL: ". $sql . "; ERROR: " . $conn->error);
 
     WriteLog('SQL: ' . $sql);
+
+    CloseDatabase($conn);
 ?>
