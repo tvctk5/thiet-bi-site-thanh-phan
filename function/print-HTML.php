@@ -171,7 +171,7 @@ function getQuota($dataQuotaHost, $hostId, $deviceId, $month){
 
 
 // Hien thi thong tin vao
-function WriteHistoryObjectVao($conn, $hostid) {
+function WriteHistoryObjectVao($conn, $hostid, $willsendcms) {
 	// quota for host
 	$dataQuotaHost[] = null;
 	$sqlquotahost = "SELECT d.*, c.months FROM device_host_quota d join calendar c on d.calendarId=c.id  WHERE d.hostId=" . $hostid;
@@ -189,7 +189,7 @@ function WriteHistoryObjectVao($conn, $hostid) {
 		while($row = $result->fetch_assoc()) {
 			// Thiết bị Vào
 			if($row["typeId"] == 0){
-				WriteHistory($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn, $dataQuotaHost);
+				WriteHistory($row["id"], $row["type"], $row["name"], $row["state"], $row["flavor"], $row["amplitude"], $row["icon"], $row["objid"], $row["value"], $row["device_hostid"], $row["deviceid"], $row["hostId"], $conn, $dataQuotaHost, $willsendcms);
 				continue;
 			}
 			// Kết quả đo
@@ -226,7 +226,7 @@ function UpdateStateKqDo($conn, $objId, $device_hostid) {
 }
 
 // Print object
-function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn, $dataQuotaHost) {
+function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $icon, $objId, $value, $device_hostid, $deviceid, $hostid, $conn, $dataQuotaHost, $willsendcms) {
 	
 	$bg_cl = "background-color-off";
 	$stateView = "OFF";
@@ -273,11 +273,11 @@ function WriteHistory($id, $objType, $objName, $state, $objFalvor, $amplitude, $
 	}
 
 	// Check history
-	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid, $device_hostid, $dataQuotaHost);
+	CheckAndCreateUpdateHistory($conn, $deviceid, $stateValue, $hostid, $device_hostid, $dataQuotaHost, $willsendcms);
 }
 
 // Hien thi thong tin vao
-function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $device_hostId, $dataQuotaHost) {
+function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $device_hostId, $dataQuotaHost, $willsendcms) {
 	$deviceId = $objId;
 	$sms_groupId = 1; // Warning group
 	// Update device_host
@@ -301,8 +301,10 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 			$sql = "INSERT INTO history(hostid,deviceid,device_hostid,value,startdate,createdate,month_of_log) VALUES($hostid, $objId, $device_hostId, '$statusValue', SYSDATE(),SYSDATE(),MONTH(SYSDATE()))";
 			if ($conn->query($sql) === TRUE){
 				// SMS
-				$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type, sms_groupId) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .",". $sms_groupId .")";
-				if ($conn->query($sql) === TRUE){}
+				if ($willsendcms){
+					$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type, sms_groupId) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .",". $sms_groupId .")";
+					if ($conn->query($sql) === TRUE){}
+				}
 			}
 				// echo "Record inserted successfully";
 			else
@@ -313,20 +315,32 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 	else{
 		// echo 'statusValue = 0';
 		// = 0
+		$dataRows = [];
+
 		$sql = "SELECT *, TIME_TO_SEC(TIMEDIFF(SYSDATE(), startdate))/3600 as hours_u, TIME_TO_SEC(TIMEDIFF(SYSDATE(), startdate))/60 as minutes_u, TIME_TO_SEC(TIMEDIFF(SYSDATE(), startdate)) as seconds_u 
 				FROM history WHERE hostid=$hostid AND deviceid='$objId' AND startdate is NOT NULL and enddate is NULL ORDER BY id DESC LIMIT 1";
-		// echo "SQL: " . $sql;
 		$result = $conn->query($sql) or die("SQL: " . $sql . "; Error: " . $conn->error);
+		// if(!$result){
+		// 	echo "<div>SQL: " . $sql . "</div>";
+		// 	return;
+		// }
+		
 		if ($result->num_rows > 0) {
+			// echo "<div>num_rows: " . $result->num_rows . "</div>";
+			
+			while( $row = mysqli_fetch_assoc($result) ) { 
+				$dataRows[] = $row;
+			}
+
 			 // output data of each row
-			 while($row = $result->fetch_assoc()) {
+			 foreach($dataRows as $row) {
 				$id = $row["id"];
 				$month_of_log = $row["month_of_log"];
 				$deviceid = $row["deviceid"];
 				$hours_u = $row["hours_u"];
 				$minutes_u = $row["minutes_u"];
 				$seconds_u = $row["seconds_u"];
-
+				// echo "<div>id: " . $id . "</div>";
 				// Định mức
 				$quotaItem = getQuota($dataQuotaHost, $hostid, $deviceid, $month_of_log);
 				$quota = $quotaItem["quota"];
@@ -349,8 +363,10 @@ function CheckAndCreateUpdateHistory($conn, $objId, $statusValue, $hostid, $devi
 
 				if ($conn->query($sql) === TRUE){
 					// SMS
-					$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type, sms_groupId) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .",". $sms_groupId .")";
-					if ($conn->query($sql) === TRUE){}
+					if ($willsendcms){
+						$sql = "INSERT INTO sms(hostId, deviceId, device_hostId, type, sms_groupId) VALUES ($hostid, $deviceId,$device_hostId, $deviceId". $statusValue .",". $sms_groupId .")";
+						if ($conn->query($sql) === TRUE){}
+					}
 				}
 					//echo "Record updated successfully";
 				else
